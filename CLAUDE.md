@@ -137,10 +137,10 @@ langfuse
 
 ### Pre-Sprint Prep (Sunday Mar 22)
 - [x] Pick document corpus — decided: 10 sources (LangChain, FastAPI, Pydantic, ChromaDB, Langfuse, React, Docker, Kubernetes, Terraform, Git)
-- [ ] Install core dependencies (`pip install -r requirements.txt`)
-- [ ] Create GitHub repo + clone locally
-- [ ] Initialize folder structure
-- [ ] Add this CLAUDE.md to project root
+- [x] Install core dependencies (`pip install -r requirements.txt`)
+- [x] Create GitHub repo + clone locally
+- [x] Initialize folder structure
+- [x] Add this CLAUDE.md to project root
 
 ### Phase 1 — Core RAG Pipeline (Days 1–4)
 
@@ -203,9 +203,9 @@ langfuse
 
 ## Current Status
 
-**Last updated:** Sunday Mar 22, 2026 — Pre-sprint prep day
-**Current phase:** Pre-Sprint Prep
-**Next task:** Install core dependencies, create GitHub repo, initialize folder structure
-**Blockers:** None
+**Last updated:** Sunday Mar 22, 2026
+**Current phase:** Pre-Sprint Prep (complete)
+**Next task:** Phase 1, Day 1 — Build document loader + chunking
+**Blockers:** `ragas` install deferred to Phase 3 (llvmlite/numba build issue on Python 3.12, not needed until then)
 
 > **Update this section** every time a task is completed or status changes.
