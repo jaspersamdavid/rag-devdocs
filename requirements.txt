@@ -1,0 +1,16 @@
+langchain
+langchain-community
+chromadb
+torch
+sentence-transformers
+fastapi
+uvicorn
+rank_bm25
+openai
+anthropic
+# ragas  # Phase 3 — requires llvmlite/numba, install later
+structlog
+pyyaml
+pypdf
+unstructured
+langfuse
