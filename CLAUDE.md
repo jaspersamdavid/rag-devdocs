@@ -145,9 +145,9 @@ langfuse
 ### Phase 1 — Core RAG Pipeline (Days 1–4)
 
 **Day 1 (Mon Mar 23) — Scaffold + Loader + Chunking**
-- [ ] Create project scaffold: pyproject.toml or requirements.txt, folder structure, git init
-- [ ] Build document loader: PyPDFLoader, UnstructuredMarkdownLoader, output Document objects with metadata (source, page)
-- [ ] Implement chunking: RecursiveCharacterTextSplitter(chunk_size=700, chunk_overlap=100), preserve metadata through splits
+- [x] Create project scaffold: pyproject.toml or requirements.txt, folder structure, git init
+- [x] Build document loader: PyPDFLoader, TextLoader (for .md), WebBaseLoader, output Document objects with metadata (source, page)
+- [x] Implement chunking: RecursiveCharacterTextSplitter(chunk_size=700, chunk_overlap=100), preserve metadata through splits
 
 **Day 2 (Tue Mar 24) — ChromaDB + Basic Retrieval**
 - [ ] Set up ChromaDB vector store: embed chunks with text-embedding-3-small or all-MiniLM-L6-v2, PersistentClient, re-runnable ingest script
@@ -203,9 +203,31 @@ langfuse
 
 ## Current Status
 
-**Last updated:** Sunday Mar 22, 2026
-**Current phase:** Pre-Sprint Prep (complete)
-**Next task:** Phase 1, Day 1 — Build document loader + chunking
+**Last updated:** Monday Mar 23, 2026
+**Current phase:** Phase 1, Day 1 (complete)
+**Completed:** Project scaffold, document loader (`ingest/loader.py`), chunker (`ingest/chunker.py`)
+**Next task:** Phase 1, Day 2 — ChromaDB vector store + basic retrieval
 **Blockers:** `ragas` install deferred to Phase 3 (llvmlite/numba build issue on Python 3.12, not needed until then)
 
 > **Update this section** every time a task is completed or status changes.
+
+---
+
+## Observations & Notes
+
+### Day 1 — Mar 23, 2026
+
+**Dependency issues encountered:**
+- `torch 2.2.2` is the latest available for Python 3.12 x86_64. Newer `transformers` (v5.x) requires `torch>=2.4`, causing an `nn` NameError at import. **Fix:** pinned `transformers<4.52` (installed 4.51.3).
+- `numpy 2.x` is incompatible with `torch 2.2.2` (compiled against NumPy 1.x ABI). **Fix:** pinned `numpy<2` (installed 1.26.4).
+- `UnstructuredMarkdownLoader` requires `unstructured[md]` extras, which pulls in `llvmlite` — fails to build on this system. **Fix:** switched to `TextLoader` for `.md` files. This is actually better for RAG since it preserves raw markdown structure (headings, code blocks) that the chunker uses as split points.
+- `unstructured` package has many missing optional deps (`emoji`, `markdown`, `spacy`, etc.) — only relevant if we use its parsers. Currently not needed since we use `TextLoader` for markdown and `PyPDFLoader` for PDFs.
+
+**Chunking results (fastapi_first_steps.md):**
+- 7,327 chars → 13 chunks, avg ~620 chars each (max 700 as configured)
+- Splitter correctly breaks on paragraph/section boundaries — no mid-sentence cuts observed
+- 100-char overlap working as expected at chunk boundaries
+- Metadata (`source`) preserved through all splits
+
+**Corpus status:**
+- Only 1 doc ingested so far (`fastapi_first_steps.md`). Remaining 9 sources (LangChain, Pydantic, ChromaDB, Langfuse, React, Docker, Kubernetes, Terraform, Git) still need to be downloaded into `docs/corpus/`.
