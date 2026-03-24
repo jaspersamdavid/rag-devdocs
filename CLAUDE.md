@@ -35,7 +35,8 @@ Production-grade RAG (Retrieval-Augmented Generation) system that ingests develo
 |------|------|-------|
 | Orchestration | LangChain | Primary framework |
 | Vector store | ChromaDB | PersistentClient, disk-backed |
-| Embeddings | text-embedding-3-small | Or all-MiniLM-L6-v2 for zero API cost |
+| Embeddings (prod) | text-embedding-3-small | OpenAI API, stored in `docs_openai` collection |
+| Embeddings (local) | all-MiniLM-L6-v2 | Free, stored in `docs_minilm` collection |
 | Keyword search | rank_bm25 | Pure Python, no infra |
 | Re-ranker | cross-encoder/ms-marco-MiniLM-L-6-v2 | From sentence-transformers, runs locally |
 | LLM | GPT-4o / Claude | Abstract behind a generate() function |
@@ -149,9 +150,14 @@ langfuse
 - [x] Build document loader: PyPDFLoader, TextLoader (for .md), WebBaseLoader, output Document objects with metadata (source, page)
 - [x] Implement chunking: RecursiveCharacterTextSplitter(chunk_size=700, chunk_overlap=100), preserve metadata through splits
 
-**Day 2 (Tue Mar 24) — ChromaDB + Basic Retrieval**
-- [ ] Set up ChromaDB vector store: embed chunks with text-embedding-3-small or all-MiniLM-L6-v2, PersistentClient, re-runnable ingest script
-- [ ] Build basic retrieval: retrieve(query: str) -> list[Document], top-k=5 similarity search
+**Day 2 (Tue Mar 24) — ChromaDB + Dual Embeddings + Basic Retrieval**
+- [ ] Set up OpenAI API key: create API account at platform.openai.com (same login as ChatGPT), add payment method, generate API key, add to .env as OPENAI_API_KEY
+- [ ] Build `ingest/embed.py`: support both embedding models, write to separate ChromaDB collections (`docs_openai` for text-embedding-3-small, `docs_minilm` for all-MiniLM-L6-v2), PersistentClient, re-runnable ingest script
+- [ ] Run OpenAI embedding: embed 60,812 chunks with text-embedding-3-small → `docs_openai` collection (~$0.12, production flow)
+- [ ] Build `retriever/vector_search.py`: retrieve(query: str) → list[Document], top-k=5 similarity search, switchable between collections via ACTIVE_COLLECTION config
+- [ ] Test retrieval against `docs_openai` collection with sample queries
+- [ ] Run MiniLM embedding: embed 60,812 chunks with all-MiniLM-L6-v2 → `docs_minilm` collection (free, local, done last)
+- [ ] Compare both: run same queries against both collections, compare retrieved chunks for learning
 
 **Day 3 (Wed Mar 25) — LLM Generation with Citations**
 - [ ] Add LLM generation with citations: pass retrieved chunks + query to LLM, prompt must enforce citing sources as [Source: doc.pdf, p.3], iterate until citations are reliable
@@ -205,8 +211,8 @@ langfuse
 
 **Last updated:** Monday Mar 23, 2026
 **Current phase:** Phase 1, Day 1 (complete)
-**Completed:** Project scaffold, document loader (`ingest/loader.py`), chunker (`ingest/chunker.py`)
-**Next task:** Phase 1, Day 2 — ChromaDB vector store + basic retrieval
+**Completed:** Project scaffold, document loader, chunker, full 10-source corpus downloaded (4,396 files, 60,812 chunks)
+**Next task:** Phase 1, Day 2 — Set up OpenAI API key, build dual-embedding ingest, ChromaDB collections, basic retrieval
 **Blockers:** `ragas` install deferred to Phase 3 (llvmlite/numba build issue on Python 3.12, not needed until then)
 
 > **Update this section** every time a task is completed or status changes.
@@ -229,5 +235,22 @@ langfuse
 - 100-char overlap working as expected at chunk boundaries
 - Metadata (`source`) preserved through all splits
 
-**Corpus status:**
-- Only 1 doc ingested so far (`fastapi_first_steps.md`). Remaining 9 sources (LangChain, Pydantic, ChromaDB, Langfuse, React, Docker, Kubernetes, Terraform, Git) still need to be downloaded into `docs/corpus/`.
+**Corpus download (all 10 sources):**
+- Downloaded via parallel sparse-checkout (`scripts/download_corpus.sh`)
+- Loader updated to support `.mdx` (Langfuse, ChromaDB) and `.adoc` (Git) formats
+- Full corpus: 4,396 files → 60,812 chunks (31.6M chars, avg 519 chars/chunk)
+- Breakdown: kubernetes 21,635 | docker 14,835 | git 10,307 | react 7,320 | fastapi 2,780 | chromadb 1,796 | pydantic 1,297 | terraform 524 | langfuse 178 | langchain 140
+
+**Embedding strategy decision:**
+- Will use **both** models: text-embedding-3-small (OpenAI, production) and all-MiniLM-L6-v2 (local, free)
+- Stored in separate ChromaDB collections (`docs_openai`, `docs_minilm`) for A/B comparison
+- OpenAI embedding cost for 60k chunks: ~$0.12
+- MiniLM is already installed locally via sentence-transformers
+- Production flow uses OpenAI; MiniLM run last as free alternative for learning/comparison
+
+**Cost analysis (full project):**
+- Embeddings (OpenAI text-embedding-3-small): ~$0.12 one-time
+- LLM generation (GPT-4o or Claude): ~$0.008 per query
+- RAGAS eval (50+ queries): ~$0.40-0.50
+- Total estimated: $2-5 (or use Anthropic $5 free API credits for generation)
+- Re-ranker (ms-marco-MiniLM) runs locally, always free
