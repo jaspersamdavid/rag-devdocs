@@ -61,8 +61,8 @@ def load_document(path_or_url: str) -> list[Document]:
     """Auto-detect the source type and load accordingly.
 
     - .pdf  → PyPDFLoader  (one Document per page)
-    - .md   → TextLoader (one Document, raw markdown preserved)
-    - http* → WebBaseLoader (one Document)
+    - .md / .mdx / .adoc → TextLoader (one Document, raw text preserved)
+    - http*              → WebBaseLoader (one Document)
 
     Raises ValueError for unsupported file types.
     """
@@ -76,12 +76,12 @@ def load_document(path_or_url: str) -> list[Document]:
     suffix = path.suffix.lower()
     if suffix == ".pdf":
         return load_pdf(path)
-    if suffix == ".md":
+    if suffix in {".md", ".mdx", ".adoc"}:
         return load_markdown(path)
 
     raise ValueError(
         f"Unsupported file type '{suffix}' for {path}. "
-        "Supported: .pdf, .md, or a URL."
+        "Supported: .pdf, .md, .mdx, .adoc, or a URL."
     )
 
 
@@ -94,7 +94,7 @@ def load_directory(directory: Path, glob_pattern: str = "**/*") -> list[Document
     Returns a flat list of Documents from all files.
     """
     docs: list[Document] = []
-    supported_suffixes = {".pdf", ".md"}
+    supported_suffixes = {".pdf", ".md", ".mdx", ".adoc"}
 
     for file_path in sorted(directory.glob(glob_pattern)):
         if file_path.is_file() and file_path.suffix.lower() in supported_suffixes:
