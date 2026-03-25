@@ -56,6 +56,9 @@ rag-devdocs/
 ├── requirements.txt       # Python dependencies
 ├── .env                   # API keys (NEVER commit)
 ├── .gitignore
+├── common/
+│   ├── __init__.py
+│   └── chroma.py          # Shared ChromaDB client, collections, embedding functions
 ├── ingest/
 │   ├── __init__.py
 │   ├── loader.py          # Document loaders (PDF, Markdown, Web)
@@ -91,6 +94,8 @@ rag-devdocs/
 ```
 langchain
 langchain-community
+langchain-openai
+python-dotenv
 chromadb
 sentence-transformers
 fastapi
@@ -151,13 +156,13 @@ langfuse
 - [x] Implement chunking: RecursiveCharacterTextSplitter(chunk_size=700, chunk_overlap=100), preserve metadata through splits
 
 **Day 2 (Tue Mar 24) — ChromaDB + Dual Embeddings + Basic Retrieval**
-- [ ] Set up OpenAI API key: create API account at platform.openai.com (same login as ChatGPT), add payment method, generate API key, add to .env as OPENAI_API_KEY
-- [ ] Build `ingest/embed.py`: support both embedding models, write to separate ChromaDB collections (`docs_openai` for text-embedding-3-small, `docs_minilm` for all-MiniLM-L6-v2), PersistentClient, re-runnable ingest script
-- [ ] Run OpenAI embedding: embed 60,812 chunks with text-embedding-3-small → `docs_openai` collection (~$0.12, production flow)
-- [ ] Build `retriever/vector_search.py`: retrieve(query: str) → list[Document], top-k=5 similarity search, switchable between collections via ACTIVE_COLLECTION config
-- [ ] Test retrieval against `docs_openai` collection with sample queries
-- [ ] Run MiniLM embedding: embed 60,812 chunks with all-MiniLM-L6-v2 → `docs_minilm` collection (free, local, done last)
-- [ ] Compare both: run same queries against both collections, compare retrieved chunks for learning
+- [x] Set up OpenAI API key: create API account at platform.openai.com (same login as ChatGPT), add payment method, generate API key, add to .env as OPENAI_API_KEY
+- [x] Build `ingest/embed.py`: support both embedding models, write to separate ChromaDB collections (`docs_openai` for text-embedding-3-small, `docs_minilm` for all-MiniLM-L6-v2), PersistentClient, re-runnable ingest script
+- [x] Run OpenAI embedding: embed 60,812 chunks with text-embedding-3-small → `docs_openai` collection (~$0.12, production flow)
+- [x] Build `retriever/vector_search.py`: retrieve(query: str) → list[Document], top-k=5 similarity search, switchable between collections via ACTIVE_COLLECTION config
+- [x] Test retrieval against `docs_openai` collection with sample queries
+- [x] Run MiniLM embedding: embed 60,812 chunks with all-MiniLM-L6-v2 → `docs_minilm` collection (free, local, done last)
+- [x] Compare both: run same queries against both collections, compare retrieved chunks for learning
 
 **Day 3 (Wed Mar 25) — LLM Generation with Citations**
 - [ ] Add LLM generation with citations: pass retrieved chunks + query to LLM, prompt must enforce citing sources as [Source: doc.pdf, p.3], iterate until citations are reliable
@@ -209,10 +214,10 @@ langfuse
 
 ## Current Status
 
-**Last updated:** Monday Mar 23, 2026
-**Current phase:** Phase 1, Day 1 (complete)
-**Completed:** Project scaffold, document loader, chunker, full 10-source corpus downloaded (4,396 files, 60,812 chunks)
-**Next task:** Phase 1, Day 2 — Set up OpenAI API key, build dual-embedding ingest, ChromaDB collections, basic retrieval
+**Last updated:** Tuesday Mar 25, 2026
+**Current phase:** Phase 1, Day 2 (complete)
+**Completed:** Dual embeddings (OpenAI + MiniLM) in ChromaDB, vector retrieval working, shared common/chroma.py module
+**Next task:** Phase 1, Day 3 — LLM generation with citations
 **Blockers:** `ragas` install deferred to Phase 3 (llvmlite/numba build issue on Python 3.12, not needed until then)
 
 > **Update this section** every time a task is completed or status changes.
@@ -254,3 +259,26 @@ langfuse
 - RAGAS eval (50+ queries): ~$0.40-0.50
 - Total estimated: $2-5 (or use Anthropic $5 free API credits for generation)
 - Re-ranker (ms-marco-MiniLM) runs locally, always free
+
+### Day 2 — Mar 25, 2026
+
+**New dependencies added:**
+- `langchain-openai` — provides OpenAI embedding support for LangChain/ChromaDB
+- `python-dotenv` — loads `.env` file into environment variables (was already installed, added to requirements.txt)
+
+**Refactored shared code into `common/chroma.py`:**
+- Embedding functions (OpenAI + MiniLM) were duplicated in `ingest/embed.py` and `retriever/vector_search.py`
+- Extracted into `common/chroma.py`: `get_chroma_client()`, `get_embedding_function()`, `get_collection()`, collection name constants
+- Both modules now import from single source of truth
+
+**Embedding results:**
+- OpenAI (text-embedding-3-small): 60,812 chunks in 438s (~7 min), 1536-dim vectors, ~$0.12
+- MiniLM (all-MiniLM-L6-v2): 60,812 chunks in 2,134s (~35 min), 384-dim vectors, free
+- MiniLM 5x slower because it runs on local CPU vs OpenAI's cloud GPUs
+
+**Retrieval quality comparison (OpenAI vs MiniLM):**
+- OpenAI consistently more accurate — finds the most relevant docs (e.g., fastapi/tutorial/first-steps.md for FastAPI questions)
+- MiniLM sometimes pulls tangential results (e.g., release-notes.md instead of tutorials)
+- Both models correctly identify the right source project (Docker questions → Docker docs, etc.)
+- Pydantic queries performed well on both models
+- Confirms decision: OpenAI for production, MiniLM for learning/comparison
