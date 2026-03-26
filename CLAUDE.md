@@ -165,7 +165,7 @@ langfuse
 - [x] Compare both: run same queries against both collections, compare retrieved chunks for learning
 
 **Day 3 (Wed Mar 25) — LLM Generation with Citations**
-- [ ] Add LLM generation with citations: pass retrieved chunks + query to LLM, prompt must enforce citing sources as [Source: doc.pdf, p.3], iterate until citations are reliable
+- [x] Add LLM generation with citations: pass retrieved chunks + query to LLM, prompt must enforce citing sources as [Source: doc.pdf, p.3], iterate until citations are reliable
 
 **Day 4 (Thu Mar 26) — FastAPI Endpoint + Phase 1 Wrap**
 - [ ] Wire up FastAPI /ask POST endpoint: take question, return answer + source chunks
@@ -214,10 +214,10 @@ langfuse
 
 ## Current Status
 
-**Last updated:** Tuesday Mar 25, 2026
-**Current phase:** Phase 1, Day 2 (complete)
-**Completed:** Dual embeddings (OpenAI + MiniLM) in ChromaDB, vector retrieval working, shared common/chroma.py module
-**Next task:** Phase 1, Day 3 — LLM generation with citations
+**Last updated:** Wednesday Mar 26, 2026
+**Current phase:** Phase 1, Day 3 (complete)
+**Completed:** LLM generation with citation-enforced prompts (GPT-4o), versioned prompt config, interactive CLI (`ragdevdocs` command), clean citation formatting
+**Next task:** Phase 1, Day 4 — FastAPI /ask endpoint + end-to-end smoke test
 **Blockers:** `ragas` install deferred to Phase 3 (llvmlite/numba build issue on Python 3.12, not needed until then)
 
 > **Update this section** every time a task is completed or status changes.
@@ -282,3 +282,27 @@ langfuse
 - Both models correctly identify the right source project (Docker questions → Docker docs, etc.)
 - Pydantic queries performed well on both models
 - Confirms decision: OpenAI for production, MiniLM for learning/comparison
+
+### Day 3 — Mar 26, 2026
+
+**LLM generation with citations:**
+- Built `api/generate.py` with `generate()` function wrapping OpenAI GPT-4o chat completions API
+- System prompt enforces citation format `[Source: fastapi/index.md]` and fallback when context is insufficient
+- `temperature=0.2` for deterministic, grounded answers
+- Source paths cleaned: strips local corpus prefix so citations show relative paths (e.g., `fastapi/index.md` not full absolute path)
+- LLM model configurable via `LLM_MODEL` env var, defaults to `gpt-4o`
+
+**Versioned prompt config:**
+- Created `prompts/v1.yaml` with system prompt, fallback message, context template, and user template
+- Loaded once at module import, not per-call
+- Prompts tracked in git — changes are visible in diff history
+
+**Interactive CLI:**
+- Added `cli.py` with `while True` input loop: `devdoc>` prompt → retrieve → generate → print answer
+- Registered as `ragdevdocs` console command via `pyproject.toml` entry point
+- Installed with `pip install -e .` (editable mode) for development
+
+**Observations on retrieval quality:**
+- Vector-only search struggles with code example queries — retrieves descriptive text instead of code snippets
+- Semantic queries ("what is FastAPI", "benefits of FastAPI") work well
+- Phase 2 hybrid search (BM25 + vector) will address the code retrieval gap
