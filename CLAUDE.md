@@ -168,9 +168,9 @@ langfuse
 - [x] Add LLM generation with citations: pass retrieved chunks + query to LLM, prompt must enforce citing sources as [Source: doc.pdf, p.3], iterate until citations are reliable
 
 **Day 4 (Thu Mar 26) — FastAPI Endpoint + Phase 1 Wrap**
-- [ ] Wire up FastAPI /ask POST endpoint: take question, return answer + source chunks
-- [ ] End-to-end smoke test: ingest → retrieve → generate → verify output
-- [ ] Phase 1 buffer: debug edge cases, clean up code, commit
+- [x] Wire up FastAPI /ask POST endpoint: take question, return answer + source chunks
+- [x] End-to-end smoke test: ingest → retrieve → generate → verify output
+- [x] Phase 1 buffer: debug edge cases, clean up code, commit
 
 ### Phase 2 — Production-Quality Retrieval (Days 5–7)
 
@@ -214,10 +214,10 @@ langfuse
 
 ## Current Status
 
-**Last updated:** Wednesday Mar 26, 2026
-**Current phase:** Phase 1, Day 3 (complete)
-**Completed:** LLM generation with citation-enforced prompts (GPT-4o), versioned prompt config, interactive CLI (`ragdevdocs` command), clean citation formatting
-**Next task:** Phase 1, Day 4 — FastAPI /ask endpoint + end-to-end smoke test
+**Last updated:** Thursday Mar 26, 2026
+**Current phase:** Phase 1 complete
+**Completed:** FastAPI /ask endpoint, end-to-end smoke test, edge case handling (empty question, missing fields, off-topic queries)
+**Next task:** Phase 2, Day 5 — BM25 keyword search + hybrid fusion + re-ranker
 **Blockers:** `ragas` install deferred to Phase 3 (llvmlite/numba build issue on Python 3.12, not needed until then)
 
 > **Update this section** every time a task is completed or status changes.
@@ -306,3 +306,23 @@ langfuse
 - Vector-only search struggles with code example queries — retrieves descriptive text instead of code snippets
 - Semantic queries ("what is FastAPI", "benefits of FastAPI") work well
 - Phase 2 hybrid search (BM25 + vector) will address the code retrieval gap
+
+### Day 4 — Mar 26, 2026
+
+**FastAPI /ask endpoint:**
+- Built `api/main.py` with POST `/ask` and GET `/health` endpoints
+- Request/response models defined with Pydantic: `AskRequest`, `AskResponse`, `SourceChunk`
+- Response includes both the cited answer and the raw source chunks with similarity distances
+- Auto-generated Swagger UI at `/docs` for interactive testing
+
+**Edge case testing:**
+- Empty question `""` → returns 400 with "Question cannot be empty"
+- Missing `question` field → Pydantic auto-rejects with 422
+- No JSON body → Pydantic auto-rejects with 422
+- Off-topic question ("How do I cook pasta?") → LLM correctly declines, no hallucination
+- Normal questions → cited answers with source chunks
+
+**Phase 1 complete:**
+- Full pipeline working: ingest → embed → retrieve → generate → serve via API
+- Two access methods: interactive CLI (`ragdevdocs`) and HTTP API (`/ask`)
+- Known limitation: vector-only search misses code examples — Phase 2 hybrid search will fix this
