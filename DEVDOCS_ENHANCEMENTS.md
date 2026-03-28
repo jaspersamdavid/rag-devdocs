@@ -53,7 +53,90 @@ Ideas and improvements identified during development. These are beyond the curre
 
 ---
 
-## 3. Domain Expansion — Healthcare, Education, Law
+## 3. Expanded Tech Stack with Role-Based Routing
+
+**Goal:** Before expanding to other domains, first widen the developer documentation corpus with more technology stacks and introduce role-based intent classification to route queries intelligently.
+
+**Additional tech stacks to ingest:**
+
+| Category | Technologies |
+|----------|-------------|
+| Frontend | React (existing), Angular, Vue, Next.js, Tailwind CSS |
+| Backend | FastAPI (existing), Django, Express, Spring Boot, Node.js |
+| Database | PostgreSQL, MongoDB, Redis, MySQL, SQLite |
+| Data Warehousing | Snowflake, BigQuery, Redshift, dbt |
+| Data & Analytics | Pandas, Apache Spark, Airflow, Jupyter |
+| DevOps | Docker (existing), Kubernetes (existing), Terraform (existing), AWS, GCP |
+
+**Role-based intent classification:**
+
+The key insight is that the same topic (e.g., "database") is relevant to multiple roles but in different ways. A user asking "how to use a database" could be a backend developer, a data analyst, or a database administrator — and each needs different documentation.
+
+**Defined roles and their knowledge boundaries:**
+
+| Role | Primary Scope | Includes | Does NOT Include |
+|------|--------------|----------|-----------------|
+| **Frontend** | UI, components, styling, client-side state | React, Angular, Vue, CSS, frontend testing, API integration to backend | Backend logic, database queries, infrastructure |
+| **Backend** | Server logic, APIs, authentication | FastAPI, Django, Express, database integration, API design, backend-to-frontend integration | Frontend components, data warehousing, analytics |
+| **Database** | Schema design, queries, optimization | PostgreSQL, MongoDB, Redis, migrations, indexing, integration to backend and warehousing | Frontend, application logic, CI/CD |
+| **Data Warehousing** | ETL, data pipelines, storage | Snowflake, BigQuery, dbt, Airflow, database integration | Frontend, backend APIs, deployment |
+| **Data Analyst** | Querying, visualization, reporting | SQL, Pandas, Jupyter, BI tools, warehouse querying | Frontend, backend code, infrastructure |
+| **DevOps** | Deployment, CI/CD, infrastructure | Docker, Kubernetes, Terraform, AWS, monitoring | Frontend components, business logic, data analysis |
+
+**How routing works:**
+
+```
+User: "how do I connect to a PostgreSQL database?"
+                    |
+                    v
+         Intent Classifier
+         (lightweight LLM call or rule-based)
+                    |
+        +-----------+-----------+
+        |                       |
+  Role: Backend            Role: Database
+  Scope: database          Scope: schema,
+  integration,             queries, optimization,
+  ORM usage,               connection config,
+  connection pooling       permissions
+        |                       |
+        v                       v
+  Search backend +          Search database
+  database docs             docs only
+  (FastAPI + PostgreSQL)    (PostgreSQL deep dive)
+```
+
+**Key principle:** Each role has **overlapping but distinct** boundaries. "Database" appears in Backend, Database, Data Warehousing, and Data Analyst roles — but each role surfaces different aspects:
+- Backend developer asking about databases → connection pooling, ORM setup, query execution from application code
+- Database admin asking about databases → schema design, indexing, performance tuning, backup/restore
+- Data analyst asking about databases → writing SELECT queries, joins, aggregations, exporting data
+
+**Multi-role queries:**
+
+The classifier doesn't always need to pick just one role. Many real-world questions span multiple roles:
+
+- "How do I connect my React frontend to my FastAPI backend?" → **Frontend + Backend**
+- "How do I set up a PostgreSQL database and deploy it with Docker?" → **Database + DevOps**
+- "How do I query Snowflake data and display it in a React dashboard?" → **Data Warehousing + Data Analyst + Frontend**
+
+For these queries, the system should:
+1. Detect all relevant roles from the question
+2. Search across documentation tagged with any of the detected roles
+3. Use RRF to merge results from each role's document pool — chunks that appear across multiple role pools get boosted, naturally surfacing integration-focused documentation
+4. The re-ranker then picks the top chunks that best answer the cross-role question
+
+This means the role classifier outputs a **list of roles with confidence scores**, not a single role. Any role above a confidence threshold gets included in the search.
+
+**Implementation plan:**
+1. Tag each documentation source with applicable roles during ingestion
+2. Build a role classifier that detects the most likely role(s) from the question (supports multi-role output)
+3. Filter the search corpus to only docs tagged with the detected role(s)
+4. For multi-role queries, search each role's pool separately and merge with RRF for cross-role boosting
+5. Fall back to full corpus search if role detection confidence is low
+
+---
+
+## 4. Domain Expansion — Healthcare, Education, Law
 
 **Goal:** Extend beyond developer documentation to other domains that have a mix of structured and unstructured data.
 
@@ -87,7 +170,55 @@ Ideas and improvements identified during development. These are beyond the curre
 
 ---
 
-## 4. Agentic Features — Actions Beyond Q&A
+## 5. Frontend Chatbot Interface — Web & Mobile
+
+**Goal:** Build a React-based chatbot UI that connects to the FastAPI `/ask` endpoint, making RAG DevDocs accessible as a web application and mobile app — not just a CLI tool.
+
+**Web application (React):**
+
+- **Chat interface:** Conversational UI with message bubbles, typing indicator, and citation highlighting
+- **Document upload:** Users can upload their own documentation (PDF, Markdown, text files) which gets ingested into the pipeline in real-time
+- **Source preview panel:** When a user clicks a `[Source: ...]` citation, show the full chunk in a side panel with the relevant section highlighted
+- **Conversation history:** Maintain chat history per session so users can refer back to previous answers
+- **Role selector:** Dropdown to select role context (Frontend, Backend, Database, etc.) to improve retrieval routing
+
+**Tech stack for frontend:**
+- React (with TypeScript) for the web UI
+- Tailwind CSS for styling
+- WebSocket or SSE for streaming LLM responses (instead of waiting for full answer)
+- React Native or Expo for mobile app (shared component logic with web)
+
+**Mobile application:**
+- Cross-platform using React Native — same chatbot interface optimized for mobile
+- Camera-based document upload: take a photo of printed documentation, OCR it, ingest it
+- Push notifications for long-running ingestion jobs
+- Offline mode: cache recent answers locally for reference without internet
+
+**Document upload flow:**
+```
+User uploads PDF/MD file
+        |
+        v
+  Backend receives file
+        |
+        v
+  loader.py parses it → chunker.py splits it → embed.py embeds it
+        |
+        v
+  Chunks added to ChromaDB with user-specific metadata
+        |
+        v
+  User can now ask questions about their uploaded document
+```
+
+**Deployment:**
+- Web app hosted on Vercel (static React build)
+- Backend API on Railway / Fly.io / AWS Lambda
+- ChromaDB on a hosted solution (Chroma Cloud, Pinecone, or Supabase pgvector)
+
+---
+
+## 6. Agentic Features — Actions Beyond Q&A
 
 **Goal:** Move from a read-only Q&A system to an agent that can take actions on the user's behalf.
 
