@@ -175,13 +175,13 @@ langfuse
 ### Phase 2 — Production-Quality Retrieval (Days 5–7)
 
 **Day 5 (Fri Mar 27) — BM25 + Hybrid Search + Re-ranker**
-- [ ] Add BM25 keyword search: install rank_bm25, index same chunks
-- [ ] Implement hybrid fusion: run BM25 + vector in parallel, merge via Reciprocal Rank Fusion (RRF)
-- [ ] Implement cross-encoder re-ranker: ms-marco-MiniLM-L-6-v2, rescore top-20 → keep top-5
+- [x] Add BM25 keyword search: install rank_bm25, index same chunks
+- [x] Implement hybrid fusion: run BM25 + vector in parallel, merge via Reciprocal Rank Fusion (RRF)
+- [x] Implement cross-encoder re-ranker: ms-marco-MiniLM-L-6-v2, rescore top-20 → keep top-5
 
-**Day 6 (Mon Mar 30) — Citation Enforcement + Prompt Versioning**
-- [ ] Add citation enforcement logic: post-generation parsing for citation markers, confidence threshold → fallback response
-- [ ] Move prompts to versioned config: prompts/v1.yaml with system prompt, citation format, fallback message, load at runtime
+**Day 6 (Fri Mar 27) — Citation Enforcement + Prompt Versioning**
+- [x] Add citation enforcement logic: post-generation parsing for citation markers, confidence threshold → fallback response
+- [x] Move prompts to versioned config: prompts/v1.yaml with system prompt, citation format, fallback message, load at runtime (already done in Day 3)
 
 **Day 7 (Tue Mar 31) — Logging + Phase 2 Integration Test**
 - [ ] Add structured logging with structlog: log every query (question, chunk IDs + scores, re-ranker scores, final answer) as JSON
@@ -214,10 +214,10 @@ langfuse
 
 ## Current Status
 
-**Last updated:** Thursday Mar 26, 2026
-**Current phase:** Phase 1 complete
-**Completed:** FastAPI /ask endpoint, end-to-end smoke test, edge case handling (empty question, missing fields, off-topic queries)
-**Next task:** Phase 2, Day 5 — BM25 keyword search + hybrid fusion + re-ranker
+**Last updated:** Friday Mar 27, 2026
+**Current phase:** Phase 2 in progress (Day 5 + Day 6 complete)
+**Completed:** BM25 keyword search, hybrid RRF fusion, cross-encoder re-ranker, citation enforcement logic, prompt versioning
+**Next task:** Phase 2, Day 7 — Structured logging with structlog + Phase 2 integration test
 **Blockers:** `ragas` install deferred to Phase 3 (llvmlite/numba build issue on Python 3.12, not needed until then)
 
 > **Update this section** every time a task is completed or status changes.
@@ -326,3 +326,47 @@ langfuse
 - Full pipeline working: ingest → embed → retrieve → generate → serve via API
 - Two access methods: interactive CLI (`ragdevdocs`) and HTTP API (`/ask`)
 - Known limitation: vector-only search misses code examples — Phase 2 hybrid search will fix this
+
+### Day 5 — Mar 27, 2026
+
+**BM25 keyword search (`retriever/bm25_search.py`):**
+- Loads all 60,812 chunks from ChromaDB into memory, tokenises into words, builds BM25Okapi index
+- Lazy initialisation: index built on first call, cached in module-level variables for subsequent calls
+- Had to batch ChromaDB `.get()` calls in groups of 5,000 — SQLite throws "too many SQL variables" error when fetching all 60k at once
+- BM25 scores attached to document metadata as `bm25_score` for transparency
+
+**Hybrid fusion (`retriever/hybrid.py`):**
+- Runs vector search (top 20) + BM25 (top 20) in parallel
+- Merges via Reciprocal Rank Fusion (RRF): `score = sum(1/(60+rank))` for each list a doc appears in
+- Documents appearing in both lists get boosted scores
+- RRF constant k=60 from original Cormack et al. (2009) paper
+
+**Cross-encoder re-ranker (`retriever/reranker.py`):**
+- Uses `cross-encoder/ms-marco-MiniLM-L-6-v2` from sentence-transformers
+- Model downloaded on first use (~90MB), cached locally after that
+- Takes top 20 RRF results, re-scores by looking at (query, chunk) pairs together, keeps top 5
+- Re-rank scores attached to metadata as `rerank_score`
+
+**Pipeline change:**
+- CLI and API updated: `from retriever.hybrid import hybrid_retrieve` replaces `from retriever.vector_search import retrieve`
+- Full pipeline: query → vector (20) + BM25 (20) → RRF merge → cross-encoder re-rank → top 5 → LLM
+
+**Retrieval quality testing:**
+- Built `scripts/test_retrieval.py` to compare all 4 stages side by side (vector, BM25, RRF, re-ranked)
+- Tested "what are all embedding models available in chromadb" — hybrid found Baseten and HuggingFace sparse models that vector-only missed
+- Perplexity embedding page still not in top 20 for broad queries — common words ("embedding", "models") compete across 60k chunks
+- Specific queries like "perplexity embedding chromadb" work perfectly — BM25 nails exact keyword matches
+- Identified need for metadata filtering and intent classification for broad "list all" type queries (documented in DEVDOCS_ENHANCEMENTS.md)
+
+### Day 6 — Mar 27, 2026
+
+**Citation enforcement (`api/generate.py`):**
+- Added regex-based citation parsing: `CITATION_PATTERN = re.compile(r"\[Source:\s*[^\]]+\]")`
+- `_extract_citations(answer)` finds all `[Source: ...]` markers in LLM output
+- `_enforce_citations(answer)` checks if at least one citation exists; returns fallback message if none found
+- Hooked into `generate()`: LLM answer passes through enforcement before reaching user
+- Tested: normal questions pass with citations, off-topic questions ("how do I cook pasta") correctly trigger fallback
+
+**Prompt versioning:**
+- Already completed in Day 3 — `prompts/v1.yaml` with system prompt, fallback, context_template, user_template
+- No additional work needed

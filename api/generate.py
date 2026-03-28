@@ -13,6 +13,7 @@ Usage:
 """
 
 import os
+import re
 from pathlib import Path
 
 import yaml
@@ -38,6 +39,49 @@ with open(PROMPTS_PATH) as f:
 # ---------------------------------------------------------------------------
 
 DEFAULT_MODEL = os.getenv("LLM_MODEL", "gpt-4o")
+
+
+# ---------------------------------------------------------------------------
+# Citation enforcement
+# ---------------------------------------------------------------------------
+
+# Regex pattern that matches [Source: anything_here]
+CITATION_PATTERN = re.compile(r"\[Source:\s*[^\]]+\]")
+
+
+def _extract_citations(answer: str) -> list[str]:
+    """Find all citation markers in the LLM's answer.
+
+    Scans the answer text for patterns like [Source: fastapi/index.md]
+    and returns them as a list.
+
+    Args:
+        answer: The raw answer string from the LLM.
+
+    Returns:
+        A list of citation strings found (e.g., ["[Source: fastapi/index.md]"]).
+        Empty list if no citations found.
+    """
+    return CITATION_PATTERN.findall(answer)
+
+
+def _enforce_citations(answer: str) -> str:
+    """Check that the LLM's answer contains citations.
+
+    If the answer has at least one [Source: ...] marker, it passes.
+    If not, the LLM ignored our citation instructions, so we return
+    the fallback message instead of an uncited answer.
+
+    Args:
+        answer: The raw answer string from the LLM.
+
+    Returns:
+        The original answer if citations are present, otherwise the fallback.
+    """
+    citations = _extract_citations(answer)
+    if citations:
+        return answer
+    return PROMPTS["fallback"].strip()
 
 
 def _build_context(chunks: list[Document]) -> str:
@@ -90,4 +134,7 @@ def generate(
         temperature=0.2,
     )
 
-    return response.choices[0].message.content or PROMPTS["fallback"].strip()
+    raw_answer = response.choices[0].message.content or PROMPTS["fallback"].strip()
+
+    # Enforce citations — reject uncited answers
+    return _enforce_citations(raw_answer)

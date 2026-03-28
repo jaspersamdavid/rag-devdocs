@@ -13,7 +13,7 @@ from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 
 from api.generate import generate
-from retriever.vector_search import retrieve
+from retriever.hybrid import hybrid_retrieve
 
 # ---------------------------------------------------------------------------
 # FastAPI app
@@ -63,7 +63,7 @@ def ask(request: AskRequest) -> AskResponse:
     if not request.question.strip():
         raise HTTPException(status_code=400, detail="Question cannot be empty.")
 
-    chunks = retrieve(request.question)
+    chunks = hybrid_retrieve(request.question)
     answer = generate(request.question, chunks)
 
     sources = [

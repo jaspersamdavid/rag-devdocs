@@ -7,7 +7,7 @@ Or directly:
     python cli.py
 """
 
-from retriever.vector_search import retrieve
+from retriever.hybrid import hybrid_retrieve
 from api.generate import generate
 
 
@@ -29,7 +29,7 @@ def main() -> None:
             print("Goodbye!")
             break
 
-        chunks = retrieve(question)
+        chunks = hybrid_retrieve(question)
         answer = generate(question, chunks)
         print(f"\n{answer}\n")
 
