@@ -14,7 +14,9 @@ Usage:
 
 import os
 import re
+import time
 from pathlib import Path
+from typing import Any
 
 import yaml
 from dotenv import load_dotenv
@@ -22,6 +24,7 @@ from langchain_core.documents import Document
 from openai import OpenAI
 
 from common.chroma import CORPUS_DIR
+from common.logging import get_logger
 
 load_dotenv()
 
@@ -39,6 +42,8 @@ with open(PROMPTS_PATH) as f:
 # ---------------------------------------------------------------------------
 
 DEFAULT_MODEL = os.getenv("LLM_MODEL", "gpt-4o")
+
+log = get_logger("api.generate")
 
 
 # ---------------------------------------------------------------------------
@@ -65,25 +70,6 @@ def _extract_citations(answer: str) -> list[str]:
     return CITATION_PATTERN.findall(answer)
 
 
-def _enforce_citations(answer: str) -> str:
-    """Check that the LLM's answer contains citations.
-
-    If the answer has at least one [Source: ...] marker, it passes.
-    If not, the LLM ignored our citation instructions, so we return
-    the fallback message instead of an uncited answer.
-
-    Args:
-        answer: The raw answer string from the LLM.
-
-    Returns:
-        The original answer if citations are present, otherwise the fallback.
-    """
-    citations = _extract_citations(answer)
-    if citations:
-        return answer
-    return PROMPTS["fallback"].strip()
-
-
 def _build_context(chunks: list[Document]) -> str:
     """Format retrieved chunks into numbered context blocks."""
     template = PROMPTS["context_template"]
@@ -105,6 +91,7 @@ def generate(
     question: str,
     chunks: list[Document],
     model: str | None = None,
+    trace: Any | None = None,
 ) -> str:
     """Generate a cited answer from retrieved documentation chunks.
 
@@ -112,29 +99,77 @@ def generate(
         question: The user's question.
         chunks: Retrieved LangChain Document objects with metadata.
         model: Override the LLM model name (default: gpt-4o).
+        trace: Optional Langfuse trace/span to attach a generation to.
 
     Returns:
         The LLM's answer string with [Source: ...] citations.
     """
     if not chunks:
+        log.warning("generate_no_chunks", question=question)
         return PROMPTS["fallback"].strip()
+
+    used_model = model or DEFAULT_MODEL
+    log.info("generate_start", question=question, model=used_model, chunk_count=len(chunks))
 
     context = _build_context(chunks)
     user_message = PROMPTS["user_template"].format(
         context=context, question=question
     )
 
+    messages = [
+        {"role": "system", "content": PROMPTS["system"].strip()},
+        {"role": "user", "content": user_message},
+    ]
+
+    # Start Langfuse generation span BEFORE the LLM call so timing is accurate
+    gen_span = None
+    if trace:
+        gen_span = trace.start_observation(
+            name="llm_generation",
+            as_type="generation",
+            model=used_model,
+            input=messages,
+        )
+
     client = OpenAI()
+    t0 = time.perf_counter()
     response = client.chat.completions.create(
-        model=model or DEFAULT_MODEL,
-        messages=[
-            {"role": "system", "content": PROMPTS["system"].strip()},
-            {"role": "user", "content": user_message},
-        ],
+        model=used_model,
+        messages=messages,
         temperature=0.2,
     )
+    llm_ms = (time.perf_counter() - t0) * 1000
 
     raw_answer = response.choices[0].message.content or PROMPTS["fallback"].strip()
 
+    # Extract token usage from the OpenAI response
+    usage = response.usage
+    log.info(
+        "llm_response",
+        model=used_model,
+        duration_ms=round(llm_ms, 1),
+        prompt_tokens=usage.prompt_tokens if usage else None,
+        completion_tokens=usage.completion_tokens if usage else None,
+        total_tokens=usage.total_tokens if usage else None,
+    )
+
+    # Close the Langfuse generation span with output and token usage
+    if gen_span:
+        gen_span.update(
+            output=raw_answer,
+            usage_details={
+                "input": usage.prompt_tokens if usage else 0,
+                "output": usage.completion_tokens if usage else 0,
+            },
+            metadata={"duration_ms": round(llm_ms, 1), "temperature": 0.2},
+        )
+        gen_span.end()
+
     # Enforce citations — reject uncited answers
-    return _enforce_citations(raw_answer)
+    citations = _extract_citations(raw_answer)
+    if citations:
+        log.info("citations_found", count=len(citations), citations=citations)
+        return raw_answer
+
+    log.warning("citations_missing", question=question, answer_preview=raw_answer[:200])
+    return PROMPTS["fallback"].strip()

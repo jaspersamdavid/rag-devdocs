@@ -9,11 +9,19 @@ Then POST a question:
          -d '{"question": "How do I create a FastAPI endpoint?"}'
 """
 
+import time
+
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 
 from api.generate import generate
+from common.langfuse_client import get_langfuse_client
+from common.logging import configure_logging, get_logger
 from retriever.hybrid import hybrid_retrieve
+
+# Initialise structured logging on app startup
+configure_logging()
+log = get_logger("api.main")
 
 # ---------------------------------------------------------------------------
 # FastAPI app
@@ -63,8 +71,19 @@ def ask(request: AskRequest) -> AskResponse:
     if not request.question.strip():
         raise HTTPException(status_code=400, detail="Question cannot be empty.")
 
-    chunks = hybrid_retrieve(request.question)
-    answer = generate(request.question, chunks)
+    log.info("request_received", question=request.question)
+    t0 = time.perf_counter()
+
+    # Create a Langfuse trace for this request (v4 API)
+    langfuse = get_langfuse_client()
+    trace = langfuse.start_observation(
+        name="rag-query",
+        as_type="span",
+        input={"question": request.question},
+    )
+
+    chunks = hybrid_retrieve(request.question, trace=trace)
+    answer = generate(request.question, chunks, trace=trace)
 
     sources = [
         SourceChunk(
@@ -74,6 +93,21 @@ def ask(request: AskRequest) -> AskResponse:
         )
         for chunk in chunks
     ]
+
+    total_ms = (time.perf_counter() - t0) * 1000
+    trace.update(
+        output={"answer": answer, "source_count": len(sources)},
+        metadata={"total_duration_ms": round(total_ms, 1)},
+    )
+    trace.end()
+
+    log.info(
+        "request_complete",
+        question=request.question,
+        source_count=len(sources),
+        answer_length=len(answer),
+        total_duration_ms=round(total_ms, 1),
+    )
 
     return AskResponse(answer=answer, sources=sources)
 

@@ -183,16 +183,16 @@ langfuse
 - [x] Add citation enforcement logic: post-generation parsing for citation markers, confidence threshold → fallback response
 - [x] Move prompts to versioned config: prompts/v1.yaml with system prompt, citation format, fallback message, load at runtime (already done in Day 3)
 
-**Day 7 (Tue Mar 31) — Logging + Phase 2 Integration Test**
-- [ ] Add structured logging with structlog: log every query (question, chunk IDs + scores, re-ranker scores, final answer) as JSON
-- [ ] Phase 2 integration test: end-to-end hybrid search → re-rank → generate → verify citations, fix regressions from Phase 1
+**Day 7 (Sat Mar 29) — Logging + Phase 2 Integration Test**
+- [x] Add structured logging with structlog: log every query (question, chunk IDs + scores, re-ranker scores, final answer) as JSON
+- [x] Phase 2 integration test: end-to-end hybrid search → re-rank → generate → verify citations, fix regressions from Phase 1
 
 ### Phase 2.5 — Langfuse Observability Layer (Day 8)
 
-**Day 8 (Wed Apr 1) — Langfuse Integration**
-- [ ] Install & configure Langfuse: set up project on Langfuse cloud (free tier), configure API keys in .env
-- [ ] Add Langfuse tracing alongside structlog: wrap retrieve() and generate() with Langfuse traces, track latency, token usage, retrieval scores, cost per query
-- [ ] Verify dual logging: run 5-10 test queries, confirm structlog JSON output matches Langfuse dashboard traces
+**Day 8 (Sat Mar 29) — Langfuse Integration**
+- [x] Install & configure Langfuse: set up project on Langfuse cloud (free tier), configure API keys in .env
+- [x] Add Langfuse tracing alongside structlog: wrap retrieve() and generate() with Langfuse traces, track latency, token usage, retrieval scores, cost per query
+- [x] Verify dual logging: run 5-10 test queries, confirm structlog JSON output matches Langfuse dashboard traces
 
 ### Phase 3 — Eval Pipeline + CI (Days 9–11)
 
@@ -210,14 +210,30 @@ langfuse
 - [ ] Add GitHub Actions eval badge
 - [ ] Final cleanup, clean git history, push, pin repo
 
+### Phase 4 — LangChain Integration + LangSmith (Days 12–13)
+
+**Day 12 — LangChain Method Implementation**
+- [ ] Create `langchain_method/` folder with LangChain equivalents of all custom retrieval and generation code
+- [ ] `langchain_method/retriever.py`: Replace custom vector search + BM25 with `Chroma.as_retriever()` + `BM25Retriever` + `EnsembleRetriever` (RRF built-in)
+- [ ] `langchain_method/reranker.py`: Replace custom cross-encoder with `CrossEncoderReranker` from langchain_community
+- [ ] `langchain_method/generate.py`: Replace direct OpenAI API call with `ChatOpenAI` + `PromptTemplate` + chain
+- [ ] `langchain_method/pipeline.py`: Wire everything into a `RetrievalQA` or LCEL chain — single entry point that matches `hybrid_retrieve()` interface
+- [ ] Swap import in `cli.py` and `api/main.py` to use LangChain method, verify same output
+
+**Day 13 — LangSmith Observability + A/B Comparison**
+- [ ] Set up LangSmith: create account, configure API keys, connect to LangChain pipeline
+- [ ] Run same test queries through both methods (custom + LangChain), compare LangSmith vs Langfuse dashboards
+- [ ] Run RAGAS eval on both methods — same golden dataset, compare faithfulness and answer relevancy scores
+- [ ] Document findings: which approach is better for what, tradeoffs between custom code and LangChain abstractions
+
 ---
 
 ## Current Status
 
-**Last updated:** Friday Mar 27, 2026
-**Current phase:** Phase 2 in progress (Day 5 + Day 6 complete)
-**Completed:** BM25 keyword search, hybrid RRF fusion, cross-encoder re-ranker, citation enforcement logic, prompt versioning
-**Next task:** Phase 2, Day 7 — Structured logging with structlog + Phase 2 integration test
+**Last updated:** Saturday Mar 29, 2026
+**Current phase:** Phase 2 + 2.5 complete (Days 5–8 done)
+**Completed:** BM25 keyword search, hybrid RRF fusion, cross-encoder re-ranker, citation enforcement, prompt versioning, structlog logging, integration test, Langfuse observability
+**Next task:** Phase 3, Day 9 — Golden eval dataset (batch 1)
 **Blockers:** `ragas` install deferred to Phase 3 (llvmlite/numba build issue on Python 3.12, not needed until then)
 
 > **Update this section** every time a task is completed or status changes.
@@ -370,3 +386,54 @@ langfuse
 **Prompt versioning:**
 - Already completed in Day 3 — `prompts/v1.yaml` with system prompt, fallback, context_template, user_template
 - No additional work needed
+
+### Day 7 — Mar 29, 2026
+
+**Structured logging (`common/logging.py`):**
+- Created centralised structlog configuration with `configure_logging()` and `get_logger(name)`
+- Uses `ConsoleRenderer` for local dev (human-readable), swappable to `JSONRenderer` for production/CI
+- Processors chain: `add_log_level` → `TimeStamper(iso)` → `ConsoleRenderer`
+- Called once at app startup in both `cli.py` and `api/main.py`
+
+**Pipeline instrumentation:**
+- `retriever/hybrid.py`: every stage timed with `time.perf_counter()` and logged — vector search, BM25, RRF fusion, cross-encoder re-rank, plus total duration
+- `api/generate.py`: LLM call timed, token usage logged (prompt_tokens, completion_tokens, total_tokens), citation enforcement logged at info/warning level
+- `api/main.py` and `cli.py`: full request lifecycle logged (received → complete with duration)
+- Each log entry includes top source paths for quick debugging without reading full result sets
+
+**Integration test (`scripts/test_integration.py`):**
+- 8 predefined test cases across 7 documentation sources + 1 off-topic
+- Each test checks: no crash, answer not empty, citations present (except off-topic)
+- Exit code 0/1 for CI compatibility
+- All 8 tests passed on first run — pipeline is stable
+
+**Performance observations from integration test:**
+- First query slow due to lazy init: vector search 2723ms, BM25 6334ms (building 60k-chunk index)
+- Subsequent queries fast: vector 400-700ms, BM25 130-330ms (index cached)
+- LLM generation is the bottleneck: 1400-4100ms per query (OpenAI API round trip)
+- RRF fusion is essentially free: 0.2-4.7ms (pure math, no models)
+
+### Day 8 — Mar 29, 2026
+
+**Langfuse integration (`common/langfuse_client.py`):**
+- Langfuse v4 installed (4.0.1) — API completely different from v2/v3 documentation
+- v4 uses `start_observation(name, as_type)` instead of old `.trace()` / `.span()` / `.generation()` methods
+- v4 pattern: `start_observation()` → `.update(output, metadata)` → `.end()` — `end()` takes no args
+- Client auto-reads `LANGFUSE_PUBLIC_KEY`, `LANGFUSE_SECRET_KEY`, `LANGFUSE_HOST` from environment
+- Langfuse US region: `https://us.cloud.langfuse.com`
+
+**Tracing architecture:**
+- Top-level span created in `cli.py` / `api/main.py` per query (name: "rag-query")
+- Passed as `trace` parameter through `hybrid_retrieve()` → each retrieval stage creates child spans
+- Passed to `generate()` → creates a "generation" observation with model name, prompt, answer, token usage
+- Langfuse auto-calculates cost from token counts for GPT-4o
+
+**Key lesson — span timing:**
+- Initial implementation created spans AFTER work was done → Langfuse showed 0ms duration
+- Fix: open span BEFORE the work, close AFTER — Langfuse measures wall-clock time between `start_observation()` and `.end()`
+- Structlog duration (manual `perf_counter()`) and Langfuse duration (automatic start/end) now match
+
+**Dual observability confirmed:**
+- structlog: local terminal output, per-stage timing, top sources, token counts
+- Langfuse: cloud dashboard with trace visualization, nested spans, cost tracking, token breakdown
+- Both show consistent data for the same queries
