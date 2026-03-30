@@ -10,7 +10,7 @@ uvicorn
 rank_bm25
 openai
 anthropic
-# ragas  # Phase 3 — requires llvmlite/numba, install later
+ragas
 structlog
 pyyaml
 pypdf

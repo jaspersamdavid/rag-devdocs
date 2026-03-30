@@ -1,0 +1,20 @@
+[
+  {
+    "question": "What is ChromaDB?",
+    "ground_truth_answer": "ChromaDB is an open-source data infrastructure for AI. It provides everything needed for retrieval: storing embeddings with metadata, searching with dense and sparse vectors, filtering by metadata, and retrieving across text, images, and other modalities. Collections are the fundamental unit of storage and querying.",
+    "source_doc": "chromadb",
+    "question_type": "factual"
+  },
+  {
+    "question": "What are all the embedding model providers that ChromaDB supports?",
+    "ground_truth_answer": "ChromaDB supports embedding functions from these providers: OpenAI, Hugging Face, Sentence Transformers, Cohere, Google Gemini, Mistral, Nomic, VoyageAI, Jina AI, Together AI, Perplexity, Amazon Bedrock, Cloudflare Workers AI, Baseten, Ollama, Roboflow, Instructor, OpenCLIP, Text2Vec, Morph, Hugging Face Server, Chroma Cloud Qwen, Chroma Cloud SPLADE, and Chroma BM25. The default embedding model is all-MiniLM-L6-v2 when no embedding function is specified.",
+    "source_doc": "chromadb",
+    "question_type": "factual-list-all"
+  },
+  {
+    "question": "Which embedding functions can I use with ChromaDB?",
+    "ground_truth_answer": "ChromaDB supports embedding functions from these providers: OpenAI, Hugging Face, Sentence Transformers, Cohere, Google Gemini, Mistral, Nomic, VoyageAI, Jina AI, Together AI, Perplexity, Amazon Bedrock, Cloudflare Workers AI, Baseten, Ollama, Roboflow, Instructor, OpenCLIP, Text2Vec, Morph, Hugging Face Server, Chroma Cloud Qwen, Chroma Cloud SPLADE, and Chroma BM25. The default embedding model is all-MiniLM-L6-v2 from Sentence Transformers.",
+    "source_doc": "chromadb",
+    "question_type": "rephrased-list-all"
+  }
+]

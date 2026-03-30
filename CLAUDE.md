@@ -196,13 +196,15 @@ langfuse
 
 ### Phase 3 — Eval Pipeline + CI (Days 9–11)
 
-**Day 9 (Thu Apr 2) — Golden Eval Dataset (Batch 1)**
-- [ ] Curate golden eval dataset batch 1: manually write 25-30 question/answer/source_doc triples (NO AI generation)
+**Day 9 (Sun Mar 30) — Golden Eval Dataset**
+- [x] Curate golden eval dataset: 61 manually written Q&A pairs across all 10 sources (NO AI generation)
+- [x] 6 question types per source: factual, how-to, conceptual, code-specific, factual-list-all, rephrased-list-all
 
-**Day 10 (Fri Apr 3) — Finish Dataset + RAGAS Eval**
-- [ ] Finish golden dataset batch 2: remaining 20-25 Q&A pairs → eval/golden.json (50+ total)
-- [ ] Set up RAGAS evaluation: measure faithfulness, answer relevancy, context precision
-- [ ] Write eval script: run_eval.py with --threshold flag, exits code 1 if faithfulness below 0.75
+**Day 10 (Sun Mar 30) — RAGAS Eval Script**
+- [x] Set up RAGAS evaluation: measure faithfulness, answer relevancy, context precision
+- [x] Write eval script: run_eval.py with --threshold flag, --golden flag, exits code 1 if below threshold
+- [x] Add consistency check: AnswerSimilarity between list-all and rephrased-list-all pairs per source
+- [x] Fix RAGAS v0.4.3 compatibility issues: embed_query/embed_text interface mismatch, async wrapper, max_tokens bump
 
 **Day 11 (Mon Apr 6) — CI Pipeline + README + Ship It**
 - [ ] Wire eval into GitHub Actions: .github/workflows/eval.yml, on PR: install → run_eval.py --threshold 0.75 → fail if below
@@ -230,11 +232,11 @@ langfuse
 
 ## Current Status
 
-**Last updated:** Saturday Mar 29, 2026
-**Current phase:** Phase 2 + 2.5 complete (Days 5–8 done)
-**Completed:** BM25 keyword search, hybrid RRF fusion, cross-encoder re-ranker, citation enforcement, prompt versioning, structlog logging, integration test, Langfuse observability
-**Next task:** Phase 3, Day 9 — Golden eval dataset (batch 1)
-**Blockers:** `ragas` install deferred to Phase 3 (llvmlite/numba build issue on Python 3.12, not needed until then)
+**Last updated:** Sunday Mar 30, 2026
+**Current phase:** Phase 3 in progress (Days 9–10 done)
+**Completed:** Full RAG pipeline, hybrid search, re-ranker, citations, structlog, Langfuse, golden eval dataset (61 Q&A pairs), RAGAS eval script with consistency check
+**Next task:** Phase 3, Day 11 — CI pipeline (GitHub Actions), README, ship
+**Blockers:** None
 
 > **Update this section** every time a task is completed or status changes.
 

@@ -1,0 +1,368 @@
+[
+  {
+    "question": "What is FastAPI?",
+    "ground_truth_answer": "FastAPI is a modern, high-performance Python web framework for building APIs. It uses Python type hints for automatic request validation, serialization, and interactive API documentation generation via Swagger UI at /docs.",
+    "source_doc": "fastapi",
+    "question_type": "factual"
+  },
+  {
+    "question": "How do I create and run a FastAPI application?",
+    "ground_truth_answer": "You create a FastAPI app instance with app = FastAPI(), define route functions using decorators like @app.get('/'), then run the development server with the 'fastapi dev' command which starts at http://127.0.0.1:8000 with auto-reload.",
+    "source_doc": "fastapi",
+    "question_type": "how-to"
+  },
+  {
+    "question": "What is the difference between query parameters and path parameters in FastAPI?",
+    "ground_truth_answer": "Path parameters are part of the URL path and declared in the route like /items/{item_id}, making them always required. Query parameters are extra key-value pairs after the ? in the URL like /items/?skip=0&limit=10. They are automatically detected as any function parameter not in the path, can have default values, and are optional when defaults are provided.",
+    "source_doc": "fastapi",
+    "question_type": "conceptual"
+  },
+  {
+    "question": "How do I configure CORS in FastAPI?",
+    "ground_truth_answer": "You import CORSMiddleware from fastapi.middleware.cors, create a list of allowed origins as strings, then add it to the app using app.add_middleware(CORSMiddleware, allow_origins=origins). You can use '*' as a wildcard but that restricts credentials like cookies and Authorization headers.",
+    "source_doc": "fastapi",
+    "question_type": "code-specific"
+  },
+  {
+    "question": "How do I handle errors in FastAPI?",
+    "ground_truth_answer": "You use HTTPException to return error responses. It is a Python exception that you raise (not return) with a status_code and detail message, for example raise HTTPException(status_code=404, detail='Item not found'). Because it is an exception, it terminates the request immediately and sends the error to the client.",
+    "source_doc": "fastapi",
+    "question_type": "how-to"
+  },
+  {
+    "question": "What are all the response types available in FastAPI?",
+    "ground_truth_answer": "FastAPI supports these response types: JSONResponse (default), HTMLResponse, PlainTextResponse, RedirectResponse, StreamingResponse, FileResponse, and the base Response class. You can also create custom response classes by inheriting from Response, for example using orjson for faster JSON serialization. You set them using the response_class parameter in the path operation decorator.",
+    "source_doc": "fastapi",
+    "question_type": "factual-list-all"
+  },
+  {
+    "question": "Which response classes does FastAPI provide?",
+    "ground_truth_answer": "FastAPI provides JSONResponse (default), HTMLResponse, PlainTextResponse, RedirectResponse, StreamingResponse, FileResponse, and the base Response class. These come from Starlette and are re-exported by FastAPI for convenience. You can also create custom response classes by inheriting from Response.",
+    "source_doc": "fastapi",
+    "question_type": "rephrased-list-all"
+  },
+  {
+    "question": "What are all the embedding model providers that ChromaDB supports?",
+    "ground_truth_answer": "ChromaDB supports embedding functions from these providers: OpenAI, Hugging Face, Sentence Transformers, Cohere, Google Gemini, Mistral, Nomic, VoyageAI, Jina AI, Together AI, Perplexity, Amazon Bedrock, Cloudflare Workers AI, Baseten, Ollama, Roboflow, Instructor, OpenCLIP, Text2Vec, Morph, Hugging Face Server, Chroma Cloud Qwen, Chroma Cloud SPLADE, and Chroma BM25. The default embedding model is all-MiniLM-L6-v2 when no embedding function is specified.",
+    "source_doc": "chromadb",
+    "question_type": "factual-list-all"
+  },
+  {
+    "question": "Which embedding functions can I use with ChromaDB?",
+    "ground_truth_answer": "ChromaDB supports embedding functions from these providers: OpenAI, Hugging Face, Sentence Transformers, Cohere, Google Gemini, Mistral, Nomic, VoyageAI, Jina AI, Together AI, Perplexity, Amazon Bedrock, Cloudflare Workers AI, Baseten, Ollama, Roboflow, Instructor, OpenCLIP, Text2Vec, Morph, Hugging Face Server, Chroma Cloud Qwen, Chroma Cloud SPLADE, and Chroma BM25. The default embedding model is all-MiniLM-L6-v2 from Sentence Transformers.",
+    "source_doc": "chromadb",
+    "question_type": "rephrased-list-all"
+  },
+  {
+    "question": "What is ChromaDB?",
+    "ground_truth_answer": "ChromaDB is an open-source data infrastructure for AI. It provides everything needed for retrieval: storing embeddings with metadata, searching with dense and sparse vectors, filtering by metadata, and retrieving across text, images, and other modalities. Collections are the fundamental unit of storage and querying.",
+    "source_doc": "chromadb",
+    "question_type": "factual"
+  },
+  {
+    "question": "How do I query a collection in ChromaDB?",
+    "ground_truth_answer": "You query a collection using collection.query() with either query_texts or query_embeddings. ChromaDB uses the collection's embedding function to embed text queries and runs a vector similarity search. By default it returns 10 results per query, which you can change with the n_results argument. You can also filter results using where for metadata filtering and where_document for full-text search.",
+    "source_doc": "chromadb",
+    "question_type": "how-to"
+  },
+  {
+    "question": "What is the difference between query and get in ChromaDB?",
+    "ground_truth_answer": "Query runs a nearest-neighbor similarity search over dense embeddings and returns results ranked by similarity. Get retrieves records by ID and/or filters without any similarity ranking. Both support where for metadata filtering and where_document for full-text search, but only query uses embeddings to find semantically similar results.",
+    "source_doc": "chromadb",
+    "question_type": "conceptual"
+  },
+  {
+    "question": "How do I filter query results by metadata in ChromaDB?",
+    "ground_truth_answer": "You pass a where dictionary to collection.query() or collection.get(). The dictionary maps a metadata field to an operator and value, for example where={'page': 10} to filter records where the page field equals 10. You can use operators like $eq, $ne, $gt, $gte, $lt, $lte for comparisons, and combine conditions with $and and $or logical operators.",
+    "source_doc": "chromadb",
+    "question_type": "code-specific"
+  },
+  {
+    "question": "What is Pydantic?",
+    "ground_truth_answer": "Pydantic is a Python library for data validation and serialization. You define models as classes that inherit from BaseModel with type-annotated fields. Pydantic guarantees that the fields of a model instance conform to the defined types after parsing and validation. It shares similarities with Python dataclasses but adds validation, serialization, and JSON schema generation.",
+    "source_doc": "pydantic",
+    "question_type": "factual"
+  },
+  {
+    "question": "How do I add custom validation to a Pydantic model field?",
+    "ground_truth_answer": "You can add custom validators using the @field_validator decorator on a class method, or using the Annotated pattern with AfterValidator, BeforeValidator, PlainValidator, or WrapValidator. The validator function takes the value, performs checks or transformations, and must return the validated value. You raise ValueError or ValidationError if validation fails.",
+    "source_doc": "pydantic",
+    "question_type": "how-to"
+  },
+  {
+    "question": "What is the difference between strict mode and lax mode in Pydantic?",
+    "ground_truth_answer": "In lax mode (the default), Pydantic attempts to coerce values to the desired type, for example converting the string '123' to the integer 123. In strict mode, Pydantic will raise a validation error instead of coercing, requiring data to be the exact correct type. Strict mode can be enabled by passing strict=True to model_validate() or by using Field(strict=True).",
+    "source_doc": "pydantic",
+    "question_type": "conceptual"
+  },
+  {
+    "question": "How do I configure field constraints like minimum and maximum values in Pydantic?",
+    "ground_truth_answer": "You use the Field() function with constraint arguments like gt, ge, lt, le for numeric bounds, min_length and max_length for strings, and pattern for regex matching. For example: age: int = Field(gt=0, le=120). You can also use the Annotated pattern: age: Annotated[int, Field(gt=0)] to keep the type and constraints together.",
+    "source_doc": "pydantic",
+    "question_type": "code-specific"
+  },
+  {
+    "question": "What are all the types of validators available in Pydantic?",
+    "ground_truth_answer": "Pydantic provides four types of field validators: after validators (run after internal validation, the default), before validators (run before internal validation), plain validators (completely replace internal validation), and wrap validators (can run code before and after internal validation). At the model level, there are three types: model before validators, model after validators, and model wrap validators. All can be defined using either the Annotated pattern or the @field_validator/@model_validator decorators.",
+    "source_doc": "pydantic",
+    "question_type": "factual-list-all"
+  },
+  {
+    "question": "Which validator types does Pydantic support?",
+    "ground_truth_answer": "Pydantic supports four field validator types: after (runs after internal validation, the default), before (runs before internal validation), plain (replaces internal validation entirely), and wrap (runs code before and after internal validation). It also supports three model validator types: model before, model after, and model wrap validators. These can be defined using the Annotated pattern with AfterValidator, BeforeValidator, PlainValidator, WrapValidator, or using the @field_validator and @model_validator decorators.",
+    "source_doc": "pydantic",
+    "question_type": "rephrased-list-all"
+  },
+  {
+    "question": "What is a Docker container?",
+    "ground_truth_answer": "A Docker container is an isolated process that has everything it needs to function without relying on pre-installed dependencies on the host machine. Containers are self-contained, isolated, independent, and portable. Unlike virtual machines which run an entire operating system with their own kernel, containers share the host kernel, making them more lightweight and allowing more applications to run on less infrastructure.",
+    "source_doc": "docker",
+    "question_type": "factual"
+  },
+  {
+    "question": "How do I build a Docker image from a Dockerfile?",
+    "ground_truth_answer": "You build a Docker image using the 'docker build' command with a Dockerfile. A Dockerfile is a text-based document that provides instructions to the image builder. Common instructions include FROM (base image), WORKDIR (working directory), COPY (copy files from host), RUN (execute commands), ENV (set environment variables), EXPOSE (declare ports), USER (set default user), and CMD (default startup command). You can tag the image with the -t flag.",
+    "source_doc": "docker",
+    "question_type": "how-to"
+  },
+  {
+    "question": "What is the difference between a Docker volume and a bind mount?",
+    "ground_truth_answer": "Volumes are persistent data stores created and fully managed by Docker, stored in a directory on the Docker host. Bind mounts depend on the directory structure and OS of the host machine and give you direct access to host files. Volumes are the preferred mechanism because they are easier to back up, can be managed via Docker CLI, work on both Linux and Windows, and can be safely shared among multiple containers. Use bind mounts when you need to access files from both the container and the host.",
+    "source_doc": "docker",
+    "question_type": "conceptual"
+  },
+  {
+    "question": "How do I configure multi-container applications with Docker Compose?",
+    "ground_truth_answer": "You define all your containers and their configurations in a single YAML file called docker-compose.yml. Each container is defined as a service with its image, ports, volumes, environment variables, and dependencies. You start everything with 'docker compose up' and stop with 'docker compose down'. Compose is declarative, so if you make changes to the file, running 'docker compose up' again will reconcile the changes intelligently.",
+    "source_doc": "docker",
+    "question_type": "code-specific"
+  },
+  {
+    "question": "What are all the network drivers available in Docker?",
+    "ground_truth_answer": "Docker provides the following built-in network drivers on Linux: bridge (the default network driver), host (removes network isolation between container and Docker host), none (completely isolates a container from the host and other containers), overlay (connects multiple Docker daemons together for Swarm), ipvlan (connects containers to external VLANs), and macvlan (makes containers appear as devices on the host network). You can also create user-defined networks where containers can communicate using container names.",
+    "source_doc": "docker",
+    "question_type": "factual-list-all"
+  },
+  {
+    "question": "Which network drivers does Docker support?",
+    "ground_truth_answer": "Docker supports these built-in network drivers on Linux: bridge (default), host (no network isolation from Docker host), none (fully isolated), overlay (for Docker Swarm multi-daemon networking), ipvlan (external VLAN connectivity), and macvlan (containers appear as physical devices on the network). The default bridge network is created automatically when Docker Engine starts. User-defined networks allow containers to communicate by container name.",
+    "source_doc": "docker",
+    "question_type": "rephrased-list-all"
+  },
+  {
+    "question": "What is Kubernetes?",
+    "ground_truth_answer": "Kubernetes (K8s) is an open-source platform for managing containerized workloads and services. Originally developed by Google and open-sourced in 2014, it provides service discovery and load balancing, storage orchestration, automated rollouts and rollbacks, automatic bin packing, self-healing, and secret and configuration management. It is a framework for running distributed systems resiliently.",
+    "source_doc": "kubernetes",
+    "question_type": "factual"
+  },
+  {
+    "question": "How do I deploy an application on Kubernetes?",
+    "ground_truth_answer": "You create a Deployment resource that provides declarative updates for Pods and ReplicaSets. You describe the desired state in a Deployment manifest specifying the container image, replicas, and Pod template. The Deployment controller then changes the actual state to the desired state at a controlled rate. You can scale the Deployment, rollback to earlier revisions, and pause/resume rollouts.",
+    "source_doc": "kubernetes",
+    "question_type": "how-to"
+  },
+  {
+    "question": "What is the difference between a Pod and a Deployment in Kubernetes?",
+    "ground_truth_answer": "A Pod is the smallest deployable unit in Kubernetes, consisting of one or more containers with shared storage and network resources that are co-located and co-scheduled. A Deployment is a higher-level controller that manages a set of Pods via ReplicaSets. Deployments provide declarative updates, automatic rollouts and rollbacks, scaling, and self-healing. You typically create Deployments rather than individual Pods, because Deployments ensure your desired number of Pod replicas are always running.",
+    "source_doc": "kubernetes",
+    "question_type": "conceptual"
+  },
+  {
+    "question": "How do I configure a Kubernetes Service to expose my application?",
+    "ground_truth_answer": "You create a Service resource that uses a selector to match Pods by their labels. The Service type determines how it is exposed: ClusterIP (default, internal-only access), NodePort (exposes on each node's IP at a static port), LoadBalancer (provisions an external load balancer via cloud provider), or ExternalName (maps to an external DNS hostname via CNAME). Services provide stable networking and load balancing across the matched Pods.",
+    "source_doc": "kubernetes",
+    "question_type": "code-specific"
+  },
+  {
+    "question": "What are all the Service types available in Kubernetes?",
+    "ground_truth_answer": "Kubernetes provides four Service types: ClusterIP (default, exposes the Service on a cluster-internal IP only reachable within the cluster), NodePort (exposes on each Node's IP at a static port, also creates a ClusterIP), LoadBalancer (exposes externally via a cloud provider's load balancer, also creates NodePort and ClusterIP), and ExternalName (maps the Service to an external hostname via a CNAME DNS record with no proxying). For public access beyond these types, you can also use Ingress or Gateway resources.",
+    "source_doc": "kubernetes",
+    "question_type": "factual-list-all"
+  },
+  {
+    "question": "Which Service types does Kubernetes support?",
+    "ground_truth_answer": "Kubernetes supports four Service types: ClusterIP (default, internal cluster access only), NodePort (static port on each node's IP), LoadBalancer (external access via cloud load balancer), and ExternalName (DNS CNAME mapping to an external hostname). ClusterIP is automatically created for NodePort and LoadBalancer types. Services use label selectors to determine which Pods receive traffic.",
+    "source_doc": "kubernetes",
+    "question_type": "rephrased-list-all"
+  },
+  {
+    "question": "What is Git?",
+    "ground_truth_answer": "Git is a fast, scalable, distributed revision control system. It provides both high-level operations and full access to internals for tracking changes in source code. Git is distributed, meaning every developer has a full copy of the repository history locally, enabling offline work and fast operations without needing a central server.",
+    "source_doc": "git",
+    "question_type": "factual"
+  },
+  {
+    "question": "How do I create and switch between branches in Git?",
+    "ground_truth_answer": "You create a new branch with 'git branch <branch-name>' and switch to it with 'git checkout <branch-name>' or 'git switch <branch-name>'. You can combine both steps with 'git checkout -b <branch-name>'. Use 'git branch' to list all local branches (current branch shown with an asterisk), 'git branch -r' for remote-tracking branches, and 'git branch -a' for both. Branches can be renamed with -m and deleted with -d.",
+    "source_doc": "git",
+    "question_type": "how-to"
+  },
+  {
+    "question": "What is the difference between git reset and git revert?",
+    "ground_truth_answer": "Git reset moves the branch tip backward, changing the commit history. It has three modes: --soft (keeps working tree and index), --mixed (default, resets index but keeps working tree), and --hard (resets both index and working tree). Git revert creates a new commit that reverses the changes made by a previous commit, preserving the commit history. Use revert for public/shared branches where history should not be rewritten, and reset for local branches where rewriting history is safe.",
+    "source_doc": "git",
+    "question_type": "conceptual"
+  },
+  {
+    "question": "How do I configure a remote repository in Git?",
+    "ground_truth_answer": "You manage remote repositories with 'git remote'. Use 'git remote add <name> <URL>' to add a new remote, 'git remote -v' to list remotes with their URLs, 'git remote rename <old> <new>' to rename, and 'git remote remove <name>' to delete. You can change URLs with 'git remote set-url'. Use 'git fetch' to download changes from a remote, 'git pull' to fetch and merge, and 'git push' to upload local commits to the remote.",
+    "source_doc": "git",
+    "question_type": "code-specific"
+  },
+  {
+    "question": "What are all the merge strategies available in Git?",
+    "ground_truth_answer": "Git supports several merge approaches: fast-forward merge (when HEAD is an ancestor of the target, simply moves the pointer forward without creating a merge commit), three-way merge (creates a merge commit with both branches as parents using a common ancestor), and rebase (transplants commits onto a different base, rewriting history for a linear result). The default merge strategy is 'ort' (Ostensibly Recursive's Twin) which handles renames and recursive ancestor merging. Strategy options include ours, theirs, ignore-space-change, and ignore-all-space.",
+    "source_doc": "git",
+    "question_type": "factual-list-all"
+  },
+  {
+    "question": "Which merge strategies does Git provide?",
+    "ground_truth_answer": "Git provides fast-forward merge (moves pointer forward when no divergence, no merge commit created), three-way merge (creates a merge commit using common ancestor, resolves conflicts with markers), and rebase (replays commits onto a new base for linear history). The default strategy is 'ort'. Fast-forward can be suppressed with --no-ff to always create a merge commit. Rebase rewrites commit history and should not be used on shared branches.",
+    "source_doc": "git",
+    "question_type": "rephrased-list-all"
+  },
+  {
+    "question": "What is React?",
+    "ground_truth_answer": "React is a JavaScript library for building user interfaces. It lets you combine small UI units like buttons, text, and images into reusable, nestable components. A React component is a JavaScript function that returns markup using JSX. Components can be as small as a button or as large as an entire page, and everything on screen can be broken down into components.",
+    "source_doc": "react",
+    "question_type": "factual"
+  },
+  {
+    "question": "How do I manage state in a React component?",
+    "ground_truth_answer": "You use the useState Hook to add state to a functional component. Call const [state, setState] = useState(initialState) to declare a state variable. When you call setState with a new value, React re-renders the component with the updated state. Regular variables don't work because they don't persist between renders and don't trigger re-renders. For complex state logic, you can use useReducer instead.",
+    "source_doc": "react",
+    "question_type": "how-to"
+  },
+  {
+    "question": "What is the difference between props and state in React?",
+    "ground_truth_answer": "Props are information passed from a parent component to a child component, similar to function arguments. They are read-only and the child cannot modify them. State is a component's own memory that persists between renders and can be updated with setter functions. Updating state triggers a re-render. Props flow down from parent to child, while state is local to the component that declares it. Any JavaScript value can be passed as props, including objects, arrays, and functions.",
+    "source_doc": "react",
+    "question_type": "conceptual"
+  },
+  {
+    "question": "How do I use useEffect to synchronize with an external system in React?",
+    "ground_truth_answer": "You call useEffect(() => { /* setup */ return () => { /* cleanup */ }; }, [dependencies]) to run side effects after rendering. The setup function runs when the component mounts and after re-renders where dependencies changed. The optional cleanup function runs before the next effect and on unmount, used to disconnect or unsubscribe. The dependency array controls when the effect re-runs: empty array means run only on mount, no array means run after every render.",
+    "source_doc": "react",
+    "question_type": "code-specific"
+  },
+  {
+    "question": "What are all the built-in hooks available in React?",
+    "ground_truth_answer": "React provides these built-in hooks: State hooks (useState, useReducer), Context hooks (useContext), Ref hooks (useRef, useImperativeHandle), Effect hooks (useEffect, useLayoutEffect, useInsertionEffect), Performance hooks (useMemo, useCallback, useTransition, useDeferredValue), and Other hooks (useDebugValue, useId, useSyncExternalStore, useActionState). There is also useEffectEvent for non-reactive events inside Effects.",
+    "source_doc": "react",
+    "question_type": "factual-list-all"
+  },
+  {
+    "question": "Which hooks does React provide?",
+    "ground_truth_answer": "React provides hooks in several categories: State (useState for direct updates, useReducer for reducer-based updates), Context (useContext for reading context), Refs (useRef for holding values, useImperativeHandle for customizing exposed refs), Effects (useEffect for external sync, useLayoutEffect for pre-paint measurement, useInsertionEffect for CSS insertion), Performance (useMemo for caching calculations, useCallback for caching functions, useTransition for non-blocking transitions, useDeferredValue for deferring updates), and Others (useDebugValue, useId, useSyncExternalStore, useActionState).",
+    "source_doc": "react",
+    "question_type": "rephrased-list-all"
+  },
+  {
+    "question": "What is LangChain?",
+    "ground_truth_answer": "LangChain is a Python framework for building agents and LLM-powered applications. It provides interoperable components and third-party integrations to simplify AI development. The architecture has four layers: core (base abstractions and interfaces), implementation (concrete implementations), integration (third-party providers like OpenAI, Anthropic, Ollama), and testing. Its ecosystem includes LangGraph for building agent workflows and LangSmith for monitoring and testing.",
+    "source_doc": "langchain",
+    "question_type": "factual"
+  },
+  {
+    "question": "How do I build a retrieval chain in LangChain?",
+    "ground_truth_answer": "You combine a retriever (like Chroma.as_retriever()) with a prompt template and an LLM using LangChain Expression Language (LCEL) or the RetrievalQA chain. The retriever fetches relevant documents, the prompt template formats them with the user question, and the LLM generates an answer. LangChain provides EnsembleRetriever for combining multiple retrieval strategies like vector search and BM25 with built-in Reciprocal Rank Fusion.",
+    "source_doc": "langchain",
+    "question_type": "how-to"
+  },
+  {
+    "question": "What is the difference between chains and agents in LangChain?",
+    "ground_truth_answer": "Chains are predefined sequences of operations where each step's input and output are connected in a fixed order. Agents are more flexible and can dynamically decide which tools to use and in what order based on the LLM's reasoning. Chains follow a fixed execution path, while agents use the LLM to plan and execute steps iteratively. LangGraph is the recommended framework for building controllable agent workflows in the LangChain ecosystem.",
+    "source_doc": "langchain",
+    "question_type": "conceptual"
+  },
+  {
+    "question": "How do I configure a prompt template in LangChain?",
+    "ground_truth_answer": "You create a PromptTemplate with a template string containing variable placeholders in curly braces, and an input_variables list. For chat models, use ChatPromptTemplate with message tuples like ('system', 'You are...') and ('user', '{question}'). Templates are formatted by calling .format() or .invoke() with the variable values. Prompt templates are part of langchain-core and can be composed into chains using the pipe operator.",
+    "source_doc": "langchain",
+    "question_type": "code-specific"
+  },
+  {
+    "question": "What are all the layers in the LangChain architecture?",
+    "ground_truth_answer": "LangChain's architecture has four layers: the Core layer (langchain-core, providing base abstractions, interfaces, and protocols), the Implementation layer (langchain, with concrete implementations and high-level utilities), the Integration layer (partners/, with third-party service integrations for OpenAI, Anthropic, Ollama, and others), and the Testing layer (standard-tests, with standardized integration tests for partner integrations).",
+    "source_doc": "langchain",
+    "question_type": "factual-list-all"
+  },
+  {
+    "question": "Which architectural layers does LangChain have?",
+    "ground_truth_answer": "LangChain is structured in four layers: Core (langchain-core with base abstractions and interfaces), Implementation (langchain with concrete implementations), Integration (partners/ directory with third-party provider integrations like OpenAI, Anthropic, Ollama), and Testing (standard-tests for integration test suites). The core layer provides the foundational protocols that all other layers build upon.",
+    "source_doc": "langchain",
+    "question_type": "rephrased-list-all"
+  },
+  {
+    "question": "What is Langfuse?",
+    "ground_truth_answer": "Langfuse is an open-source observability and evaluation platform for LLM applications. It provides tracing to track every LLM call and relevant logic, session tracking for multi-step conversations, timeline views for debugging latency, user-level cost monitoring, and dashboards for analysis. It supports three instrumentation methods: context managers, decorators, and manual observations.",
+    "source_doc": "langfuse",
+    "question_type": "factual"
+  },
+  {
+    "question": "How do I add tracing to my LLM application with Langfuse?",
+    "ground_truth_answer": "You install the langfuse package and instrument your code using one of three methods: context managers (with langfuse.start_as_current_observation(as_type='span', name='...') as span), decorators (@observe), or manual observation creation via the SDK. Langfuse records what happens in your application and sends trace data to the Langfuse server. Each trace can contain nested spans for retrieval steps and generation observations for LLM calls with model name, input, output, and token usage.",
+    "source_doc": "langfuse",
+    "question_type": "how-to"
+  },
+  {
+    "question": "What is the difference between traces and sessions in Langfuse?",
+    "ground_truth_answer": "A trace represents a single request or operation, tracking every LLM call and relevant logic within that request. It contains nested observations like spans and generations. A session groups multiple traces together to track multi-step conversations or agentic workflows over time. You link traces to a session using a sessionId. Traces show the execution flow of one query, while sessions show the full conversation or workflow across multiple queries.",
+    "source_doc": "langfuse",
+    "question_type": "conceptual"
+  },
+  {
+    "question": "How do I manage prompts in Langfuse?",
+    "ground_truth_answer": "You create prompts via the Langfuse UI, Python SDK, JS/TS SDK, or API. Prompts can be text or chat type (cannot change after creation). You create new versions by calling create_prompt with the same name, and use labels like 'production' to control which version is served. To fetch a prompt, call langfuse.get_prompt(name) which defaults to the production label. You then compile the template with variables before passing it to your LLM.",
+    "source_doc": "langfuse",
+    "question_type": "code-specific"
+  },
+  {
+    "question": "What are all the evaluation methods available in Langfuse?",
+    "ground_truth_answer": "Langfuse provides these evaluation methods: User Feedback (collect feedback from users via Browser SDK or server-side SDKs), LLM-as-a-Judge (run managed evaluations on traces for automated step-wise evaluation), Experiments (evaluate prompts and models on datasets directly in the UI), Annotation Queue (human annotation workflows for manual baseline evaluation), and Custom Evals (custom evaluation pipelines). Results can be plotted and analyzed in the analytics dashboard.",
+    "source_doc": "langfuse",
+    "question_type": "factual-list-all"
+  },
+  {
+    "question": "Which evaluation methods does Langfuse support?",
+    "ground_truth_answer": "Langfuse supports User Feedback (frontend and server-side collection), LLM-as-a-Judge (automated managed evaluations on traces), Experiments (prompt and model evaluation on datasets in the UI), Annotation Queue (human-in-the-loop manual evaluation), and Custom Evals (custom evaluation pipelines). All evaluation results are stored as scores and can be analyzed in the Langfuse dashboard.",
+    "source_doc": "langfuse",
+    "question_type": "rephrased-list-all"
+  },
+  {
+    "question": "What is Terraform?",
+    "ground_truth_answer": "Terraform is a tool for building, changing, and versioning infrastructure safely and efficiently using Infrastructure as Code. It uses a high-level configuration syntax to define infrastructure as blueprints that can be versioned and treated like code. Key features include execution plans (showing what will happen before applying), a resource graph (parallelizing creation of non-dependent resources), and change automation (applying complex changesets with minimal human interaction).",
+    "source_doc": "terraform",
+    "question_type": "factual"
+  },
+  {
+    "question": "How do I plan and apply infrastructure changes with Terraform?",
+    "ground_truth_answer": "You run 'terraform plan' to generate an execution plan showing exactly what will be created, updated, or destroyed. After reviewing the plan, you run 'terraform apply' to execute the changes. Terraform builds a resource graph to determine the order of operations, creating or updating resources in dependency order and deleting in reverse order. The state file tracks the current state of your infrastructure so Terraform knows what changes are needed.",
+    "source_doc": "terraform",
+    "question_type": "how-to"
+  },
+  {
+    "question": "What is the difference between Terraform providers and modules?",
+    "ground_truth_answer": "Providers are plugins that interact with specific infrastructure services like AWS, Azure, or GCP. They are downloaded from the Terraform Registry and communicate with Terraform Core via gRPC. Modules are reusable groups of resources that can be called with variables, allowing you to organize and share infrastructure configurations. Providers define what resources are available, while modules define how resources are grouped and configured together.",
+    "source_doc": "terraform",
+    "question_type": "conceptual"
+  },
+  {
+    "question": "How do I configure resources and variables in Terraform?",
+    "ground_truth_answer": "You define resources using resource blocks with a type and name, specifying attributes in the configuration. Variables are declared with variable blocks and can have default values, type constraints, and descriptions. You pass variable values via command line flags, .tfvars files, or environment variables. Terraform merges your configuration with prior state to compute a proposed new state, and the provider determines the planned state after applying.",
+    "source_doc": "terraform",
+    "question_type": "code-specific"
+  },
+  {
+    "question": "What are all the resource lifecycle actions in Terraform?",
+    "ground_truth_answer": "Terraform has three core resource lifecycle actions: Create (resource exists in configuration but not in prior state), Update (resource exists in both configuration and state but with differences), and Delete (resource exists in prior state but not in configuration). There is also the create_before_destroy lifecycle option that changes ordering so the new resource is created before the old one is destroyed. Terraform executes creates and updates in dependency order, and deletes in reverse dependency order.",
+    "source_doc": "terraform",
+    "question_type": "factual-list-all"
+  },
+  {
+    "question": "Which resource lifecycle actions does Terraform support?",
+    "ground_truth_answer": "Terraform supports Create (new resource in config with no prior state), Update (resource exists in both config and state with differences not classified as normalization), and Delete (resource in prior state with no matching config). The create_before_destroy lifecycle meta-argument changes the default ordering. Creates and updates follow dependency order while deletes follow reverse dependency order.",
+    "source_doc": "terraform",
+    "question_type": "rephrased-list-all"
+  }
+]
