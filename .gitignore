@@ -15,6 +15,9 @@ build/
 # ChromaDB
 chroma_data/
 
+# Eval results (generated output)
+eval/eval_results.json
+
 # IDE
 .vscode/
 .idea/

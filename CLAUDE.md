@@ -206,11 +206,13 @@ langfuse
 - [x] Add consistency check: AnswerSimilarity between list-all and rephrased-list-all pairs per source
 - [x] Fix RAGAS v0.4.3 compatibility issues: embed_query/embed_text interface mismatch, async wrapper, max_tokens bump
 
-**Day 11 (Mon Apr 6) — CI Pipeline + README + Ship It**
-- [ ] Wire eval into GitHub Actions: .github/workflows/eval.yml, on PR: install → run_eval.py --threshold 0.75 → fail if below
-- [ ] Write README: architecture, how to ingest new corpus, how to run locally, eval score explanation, dual observability docs
-- [ ] Add GitHub Actions eval badge
-- [ ] Final cleanup, clean git history, push, pin repo
+**Day 11 (Sun Mar 30) — CI Pipeline + README + Ship It**
+- [x] Wire eval into GitHub Actions: .github/workflows/eval.yml, on PR: install → run_eval.py --threshold 0.75 → fail if below
+- [x] CI golden dataset: 20-question subset (2 per source, all 6 types) for fast CI runs
+- [x] ChromaDB vector store uploaded to GitHub Releases for CI download
+- [x] OpenAI API key stored in GitHub Secrets
+- [x] Write README: architecture, how to ingest new corpus, how to run locally, eval score explanation, dual observability docs
+- [x] Final cleanup, push, pin repo
 
 ### Phase 4 — LangChain Integration + LangSmith (Days 12–13)
 
@@ -233,9 +235,9 @@ langfuse
 ## Current Status
 
 **Last updated:** Sunday Mar 30, 2026
-**Current phase:** Phase 3 in progress (Days 9–10 done)
-**Completed:** Full RAG pipeline, hybrid search, re-ranker, citations, structlog, Langfuse, golden eval dataset (61 Q&A pairs), RAGAS eval script with consistency check
-**Next task:** Phase 3, Day 11 — CI pipeline (GitHub Actions), README, ship
+**Current phase:** Phase 3 complete (Days 9–11 done)
+**Completed:** Full RAG pipeline, hybrid search, re-ranker, citations, structlog, Langfuse, golden eval dataset (61 Q&A pairs), RAGAS eval script with consistency check, GitHub Actions CI eval gate, CI golden dataset (20 questions), ChromaDB in GitHub Releases, README, final cleanup
+**Next task:** Phase 4 — LangChain integration + LangSmith (Days 12–13)
 **Blockers:** None
 
 > **Update this section** every time a task is completed or status changes.
