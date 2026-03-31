@@ -1,0 +1,44 @@
+name: RAG Eval Gate
+
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:  # allow manual trigger
+
+jobs:
+  eval:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Download ChromaDB vector store
+        run: |
+          gh release download chroma-data-v1 --pattern "chroma_data.tar.gz"
+          tar -xzf chroma_data.tar.gz
+          rm chroma_data.tar.gz
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Run RAGAS eval (CI subset)
+        run: python eval/run_eval.py --golden eval/ci_golden.json --threshold 0.75
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+
+      - name: Upload eval results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: eval-results
+          path: eval/eval_results.json

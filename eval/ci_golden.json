@@ -1,0 +1,122 @@
+[
+  {
+    "question": "What is FastAPI?",
+    "ground_truth_answer": "FastAPI is a modern, high-performance Python web framework for building APIs. It uses Python type hints for automatic request validation, serialization, and interactive API documentation generation via Swagger UI at /docs.",
+    "source_doc": "fastapi",
+    "question_type": "factual"
+  },
+  {
+    "question": "How do I create and run a FastAPI application?",
+    "ground_truth_answer": "You create a FastAPI app instance with app = FastAPI(), define route functions using decorators like @app.get('/'), then run the development server with the 'fastapi dev' command which starts at http://127.0.0.1:8000 with auto-reload.",
+    "source_doc": "fastapi",
+    "question_type": "how-to"
+  },
+  {
+    "question": "What is the difference between query and get in ChromaDB?",
+    "ground_truth_answer": "Query runs a nearest-neighbor similarity search over dense embeddings and returns results ranked by similarity. Get retrieves records by ID and/or filters without any similarity ranking. Both support where for metadata filtering and where_document for full-text search, but only query uses embeddings to find semantically similar results.",
+    "source_doc": "chromadb",
+    "question_type": "conceptual"
+  },
+  {
+    "question": "How do I filter query results by metadata in ChromaDB?",
+    "ground_truth_answer": "You pass a where dictionary to collection.query() or collection.get(). The dictionary maps a metadata field to an operator and value, for example where={'page': 10} to filter records where the page field equals 10. You can use operators like $eq, $ne, $gt, $gte, $lt, $lte for comparisons, and combine conditions with $and and $or logical operators.",
+    "source_doc": "chromadb",
+    "question_type": "code-specific"
+  },
+  {
+    "question": "What are all the types of validators available in Pydantic?",
+    "ground_truth_answer": "Pydantic provides four types of field validators: after validators (run after internal validation, the default), before validators (run before internal validation), plain validators (completely replace internal validation), and wrap validators (can run code before and after internal validation). At the model level, there are three types: model before validators, model after validators, and model wrap validators. All can be defined using either the Annotated pattern or the @field_validator/@model_validator decorators.",
+    "source_doc": "pydantic",
+    "question_type": "factual-list-all"
+  },
+  {
+    "question": "Which validator types does Pydantic support?",
+    "ground_truth_answer": "Pydantic supports four field validator types: after (runs after internal validation, the default), before (runs before internal validation), plain (replaces internal validation entirely), and wrap (runs code before and after internal validation). It also supports three model validator types: model before, model after, and model wrap validators. These can be defined using the Annotated pattern with AfterValidator, BeforeValidator, PlainValidator, WrapValidator, or using the @field_validator and @model_validator decorators.",
+    "source_doc": "pydantic",
+    "question_type": "rephrased-list-all"
+  },
+  {
+    "question": "What is a Docker container?",
+    "ground_truth_answer": "A Docker container is an isolated process that has everything it needs to function without relying on pre-installed dependencies on the host machine. Containers are self-contained, isolated, independent, and portable. Unlike virtual machines which run an entire operating system with their own kernel, containers share the host kernel, making them more lightweight and allowing more applications to run on less infrastructure.",
+    "source_doc": "docker",
+    "question_type": "factual"
+  },
+  {
+    "question": "How do I build a Docker image from a Dockerfile?",
+    "ground_truth_answer": "You build a Docker image using the 'docker build' command with a Dockerfile. A Dockerfile is a text-based document that provides instructions to the image builder. Common instructions include FROM (base image), WORKDIR (working directory), COPY (copy files from host), RUN (execute commands), ENV (set environment variables), EXPOSE (declare ports), USER (set default user), and CMD (default startup command). You can tag the image with the -t flag.",
+    "source_doc": "docker",
+    "question_type": "how-to"
+  },
+  {
+    "question": "What is the difference between a Pod and a Deployment in Kubernetes?",
+    "ground_truth_answer": "A Pod is the smallest deployable unit in Kubernetes, consisting of one or more containers with shared storage and network resources that are co-located and co-scheduled. A Deployment is a higher-level controller that manages a set of Pods via ReplicaSets. Deployments provide declarative updates, automatic rollouts and rollbacks, scaling, and self-healing. You typically create Deployments rather than individual Pods, because Deployments ensure your desired number of Pod replicas are always running.",
+    "source_doc": "kubernetes",
+    "question_type": "conceptual"
+  },
+  {
+    "question": "How do I configure a Kubernetes Service to expose my application?",
+    "ground_truth_answer": "You create a Service resource that uses a selector to match Pods by their labels. The Service type determines how it is exposed: ClusterIP (default, internal-only access), NodePort (exposes on each node's IP at a static port), LoadBalancer (provisions an external load balancer via cloud provider), or ExternalName (maps to an external DNS hostname via CNAME). Services provide stable networking and load balancing across the matched Pods.",
+    "source_doc": "kubernetes",
+    "question_type": "code-specific"
+  },
+  {
+    "question": "What are all the merge strategies available in Git?",
+    "ground_truth_answer": "Git supports several merge approaches: fast-forward merge (when HEAD is an ancestor of the target, simply moves the pointer forward without creating a merge commit), three-way merge (creates a merge commit with both branches as parents using a common ancestor), and rebase (transplants commits onto a different base, rewriting history for a linear result). The default merge strategy is 'ort' (Ostensibly Recursive's Twin) which handles renames and recursive ancestor merging. Strategy options include ours, theirs, ignore-space-change, and ignore-all-space.",
+    "source_doc": "git",
+    "question_type": "factual-list-all"
+  },
+  {
+    "question": "Which merge strategies does Git provide?",
+    "ground_truth_answer": "Git provides fast-forward merge (moves pointer forward when no divergence, no merge commit created), three-way merge (creates a merge commit using common ancestor, resolves conflicts with markers), and rebase (replays commits onto a new base for linear history). The default strategy is 'ort'. Fast-forward can be suppressed with --no-ff to always create a merge commit. Rebase rewrites commit history and should not be used on shared branches.",
+    "source_doc": "git",
+    "question_type": "rephrased-list-all"
+  },
+  {
+    "question": "What is React?",
+    "ground_truth_answer": "React is a JavaScript library for building user interfaces. It lets you combine small UI units like buttons, text, and images into reusable, nestable components. A React component is a JavaScript function that returns markup using JSX. Components can be as small as a button or as large as an entire page, and everything on screen can be broken down into components.",
+    "source_doc": "react",
+    "question_type": "factual"
+  },
+  {
+    "question": "How do I manage state in a React component?",
+    "ground_truth_answer": "You use the useState Hook to add state to a functional component. Call const [state, setState] = useState(initialState) to declare a state variable. When you call setState with a new value, React re-renders the component with the updated state. Regular variables don't work because they don't persist between renders and don't trigger re-renders. For complex state logic, you can use useReducer instead.",
+    "source_doc": "react",
+    "question_type": "how-to"
+  },
+  {
+    "question": "What is the difference between chains and agents in LangChain?",
+    "ground_truth_answer": "Chains are predefined sequences of operations where each step's input and output are connected in a fixed order. Agents are more flexible and can dynamically decide which tools to use and in what order based on the LLM's reasoning. Chains follow a fixed execution path, while agents use the LLM to plan and execute steps iteratively. LangGraph is the recommended framework for building controllable agent workflows in the LangChain ecosystem.",
+    "source_doc": "langchain",
+    "question_type": "conceptual"
+  },
+  {
+    "question": "How do I configure a prompt template in LangChain?",
+    "ground_truth_answer": "You create a PromptTemplate with a template string containing variable placeholders in curly braces, and an input_variables list. For chat models, use ChatPromptTemplate with message tuples like ('system', 'You are...') and ('user', '{question}'). Templates are formatted by calling .format() or .invoke() with the variable values. Prompt templates are part of langchain-core and can be composed into chains using the pipe operator.",
+    "source_doc": "langchain",
+    "question_type": "code-specific"
+  },
+  {
+    "question": "What is Langfuse?",
+    "ground_truth_answer": "Langfuse is an open-source observability and evaluation platform for LLM applications. It provides tracing to track every LLM call and relevant logic, session tracking for multi-step conversations, timeline views for debugging latency, user-level cost monitoring, and dashboards for analysis. It supports three instrumentation methods: context managers, decorators, and manual observations.",
+    "source_doc": "langfuse",
+    "question_type": "factual"
+  },
+  {
+    "question": "How do I add tracing to my LLM application with Langfuse?",
+    "ground_truth_answer": "You install the langfuse package and instrument your code using one of three methods: context managers (with langfuse.start_as_current_observation(as_type='span', name='...') as span), decorators (@observe), or manual observation creation via the SDK. Langfuse records what happens in your application and sends trace data to the Langfuse server. Each trace can contain nested spans for retrieval steps and generation observations for LLM calls with model name, input, output, and token usage.",
+    "source_doc": "langfuse",
+    "question_type": "how-to"
+  },
+  {
+    "question": "What is the difference between Terraform providers and modules?",
+    "ground_truth_answer": "Providers are plugins that interact with specific infrastructure services like AWS, Azure, or GCP. They are downloaded from the Terraform Registry and communicate with Terraform Core via gRPC. Modules are reusable groups of resources that can be called with variables, allowing you to organize and share infrastructure configurations. Providers define what resources are available, while modules define how resources are grouped and configured together.",
+    "source_doc": "terraform",
+    "question_type": "conceptual"
+  },
+  {
+    "question": "How do I configure resources and variables in Terraform?",
+    "ground_truth_answer": "You define resources using resource blocks with a type and name, specifying attributes in the configuration. Variables are declared with variable blocks and can have default values, type constraints, and descriptions. You pass variable values via command line flags, .tfvars files, or environment variables. Terraform merges your configuration with prior state to compute a proposed new state, and the provider determines the planned state after applying.",
+    "source_doc": "terraform",
+    "question_type": "code-specific"
+  }
+]
