@@ -45,6 +45,8 @@ Production-grade RAG (Retrieval-Augmented Generation) system that ingests develo
 | Observability (prod) | Langfuse | LLM tracing, cost tracking, dashboard |
 | Evaluation | RAGAS | Faithfulness, answer relevancy, context precision |
 | CI | GitHub Actions | Automated eval gate on every PR |
+| Frontend | React + Vite + Tailwind CSS | Claude AI-inspired chat interface |
+| Markdown rendering | react-markdown + remark-gfm | GitHub-flavored markdown in responses |
 
 ---
 
@@ -80,6 +82,18 @@ rag-devdocs/
 │   └── run_eval.py        # RAGAS eval script with --threshold flag
 ├── prompts/
 │   └── v1.yaml            # Versioned prompts (system, citation format, fallback)
+├── frontend/
+│   ├── index.html         # Entry point with Inter font
+│   ├── package.json       # React 19, react-markdown, Tailwind CSS v4
+│   ├── vite.config.ts     # Vite + React + Tailwind plugin
+│   ├── public/
+│   │   └── favicon.svg    # Amber sparkle favicon
+│   └── src/
+│       ├── App.tsx        # Claude AI-style chat UI (all components)
+│       ├── api.ts         # API client for /ask and /health endpoints
+│       ├── types.ts       # TypeScript interfaces (Message, SourceChunk, AskResponse)
+│       ├── index.css      # Tailwind + custom theme + markdown styles + animations
+│       └── main.tsx       # React entry point
 ├── docs/
 │   └── corpus/            # Downloaded documentation files
 └── .github/
@@ -234,9 +248,9 @@ langfuse
 
 ## Current Status
 
-**Last updated:** Sunday Mar 30, 2026
-**Current phase:** Phase 3 complete (Days 9–11 done)
-**Completed:** Full RAG pipeline, hybrid search, re-ranker, citations, structlog, Langfuse, golden eval dataset (61 Q&A pairs), RAGAS eval script with consistency check, GitHub Actions CI eval gate, CI golden dataset (20 questions), ChromaDB in GitHub Releases, README, final cleanup
+**Last updated:** Friday Apr 4, 2026
+**Current phase:** Frontend complete, Phase 4 next
+**Completed:** Full RAG pipeline, hybrid search, re-ranker, citations, structlog, Langfuse, golden eval dataset (61 Q&A pairs), RAGAS eval script with consistency check, GitHub Actions CI eval gate, CI golden dataset (20 questions), ChromaDB in GitHub Releases, README, final cleanup, **React frontend with Claude AI-inspired chat interface**
 **Next task:** Phase 4 — LangChain integration + LangSmith (Days 12–13)
 **Blockers:** None
 
@@ -441,3 +455,22 @@ langfuse
 - structlog: local terminal output, per-stage timing, top sources, token counts
 - Langfuse: cloud dashboard with trace visualization, nested spans, cost tracking, token breakdown
 - Both show consistent data for the same queries
+
+### Frontend — Apr 4, 2026
+
+**React frontend with Claude AI-inspired chat interface:**
+- Stack: React 19 + Vite 8 + Tailwind CSS v4 + TypeScript
+- Design modeled after Claude AI's chat interface (dark mode)
+- Layout: left sidebar (260px) + main chat area + right sources panel (340px, slide-in)
+- Sidebar: "New chat" button, single "Chat 1" entry, user profile with amber avatar, connection indicator
+- Empty state: centered amber sparkle icon + "What can I help you with?" greeting + input — transitions to chat flow on first message
+- User messages: right-aligned, rounded pill with dark gray background, no avatar
+- Assistant messages: left-aligned with amber sparkle avatar, no bubble — text flows freely
+- Markdown rendering via `react-markdown` + `remark-gfm` (headings, code blocks, lists, tables, links, blockquotes)
+- Inline `[Source: ...]` citations stripped from text; sources shown via clickable "N sources" button per response
+- Sources panel slides in from right (like Claude artifacts) with expandable cards showing file name, path, content preview
+- Thinking animation: amber pulsing orb with glow + three staggered dots + cycling phrases ("Searching documentation...", etc.)
+- Custom warm dark color palette (not pure black), Inter font, custom scrollbar styling
+- CORS middleware added to FastAPI (`api/main.py`) for `localhost:5173` dev server
+- Favicon updated to amber sparkle matching the branding
+- Run with `cd frontend && npm run dev` (Vite dev server on port 5173)
